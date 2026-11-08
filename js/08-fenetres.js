@@ -463,7 +463,7 @@
           return '<div class="dfi-stat"><img class="dfi-ico" src="' + FI + 'icone_' + key + '.png" alt=""><span class="dfi-stat-label">' + label + '</span>' +
             '<div class="dfi-bar"><div class="dfi-bar-fill dfi-bar-' + kind + '" style="width:' + val + '%"></div></div><span class="dfi-stat-val mono">' + val + '%</span></div>';
         };
-        inner = '<div class="dfi-portrait" style="background-image:url(\'' + FI + 'habitat_' + fsp.zone + '.png\')">' + dpSquareHtml(fsp.id, { kind: "face", className: "dfi-dino" }) + '</div>' +
+        inner = '<div class="dfi-portrait" style="background-image:url(\'' + FI + 'habitat_' + fsp.zone + '.png\')">' + dpSquareHtml(fsp.id, { kind: "face", className: "dfi-dino", style: dpDinoFilterCss(fd) }) + '</div>' +
           '<h3 class="dfi-name">' + esc(fd.name) + '</h3>' +
           '<p class="dfi-sub">' + esc(fsp.name) + ' · <span class="dp-rarity dp-rarity-' + fsp.rarity + '">' + frarity.label + '</span> · ' + (fd.sex === "M" ? "♂ Mâle" : "♀ Femelle") + ' · ' + dpAgeLabel(fd) + '</p>' +
           fneedBanner +

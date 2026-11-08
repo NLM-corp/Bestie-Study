@@ -1813,6 +1813,11 @@
     },
     dpGoHub: function () { dpView = { mode: "hub" }; navigate("#/dinopark"); render(); },
     dpGoZone: function (zoneId) { dpView = { mode: "zone", zoneId: zoneId }; render(); },
+    dpEnterPortal: function (btn, zoneId) {
+      if (btn.classList.contains("entering")) return;
+      btn.classList.add("entering");
+      setTimeout(function () { App.dpGoZone(zoneId); }, 650);
+    },
     dpGoLab: function () { dpView = { mode: "lab" }; render(); },
     dpGoEncyclopedia: function () { dpView = { mode: "encyclopedia" }; render(); },
     dpGoQuiz: function () { dpView = { mode: "quiz", quizNav: { level: "subjects" } }; render(); },
@@ -1931,7 +1936,7 @@
     },
     dpCollectHatched: function (slot) {
       var dp = dpData(); var inc = dp.incubators[slot]; var sp = dpSpecies(inc.speciesId);
-      var dino = { id: uid(), speciesId: sp.id, name: sp.name, sex: Math.random() < 0.5 ? "M" : "F", bornAt: Date.now(), lastFedAt: dp.virtualNow, health: 100, enclosureId: null };
+      var dino = { id: uid(), speciesId: sp.id, name: sp.name, sex: Math.random() < 0.5 ? "M" : "F", color: dpRandomDinoColor(), bornAt: Date.now(), lastFedAt: dp.virtualNow, health: 100, enclosureId: null };
       dp.dinosaurs.push(dino);
       dp.discovered[sp.id] = true;
       dp.incubators[slot] = null;

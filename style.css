@@ -628,6 +628,7 @@
   .dp-zone-card:not(.locked):hover { transform: translateY(-3px); }
   .dp-zone-card.locked { cursor: default; }
   .dp-zone-portal { width: 100%; aspect-ratio: 1024 / 1536; background-size: 100% 100%; background-position: center; background-repeat: no-repeat; }
+/* tourbillon animé : planche de 12 images ; au clic, il tourne plus vite, grossit et s'illumine */  .dp-portal-anim { --n: 12; background-size: 1200% 100%; image-rendering: pixelated; animation: dtSheet 1.7s steps(12) infinite; }  .dp-zone-card.entering .dp-portal-anim { animation-duration: 0.35s; transform: scale(1.12); filter: brightness(1.35) saturate(1.2); transition: transform 0.6s ease-in, filter 0.6s ease-in; }  .dp-zone-card.entering .dp-zone-sign { opacity: 0.6; transition: opacity 0.4s; }
   .dp-zone-sign {
     width: 100%; box-sizing: border-box;
     background-image: url('assets/objects/decor/pancarte courte.png');
@@ -902,6 +903,20 @@
   @keyframes dtFly { from { left: -6%; } to { left: 106%; } }
   @keyframes dtFlyRev { from { left: 106%; } to { left: -6%; } }
   @keyframes dtFlap { 0%, 100% { background-position: 0 0; } 50% { background-position: 100% 0; } }
+  /* petits animaux du décor : leur planche d'images, et pour certains un petit trajet autour de leur place */
+  .dt-fauna { position: absolute; background-repeat: no-repeat; background-size: calc(var(--n) * 100%) 100%; image-rendering: pixelated; animation-name: dtSheet; animation-timing-function: steps(var(--n)); animation-iteration-count: infinite; }
+  .dt-fauna-flutter { animation-name: dtSheet, dtFlutter; animation-timing-function: steps(var(--n)), ease-in-out; }
+  .dt-fauna-swim { animation-name: dtSheet, dtSwim; animation-timing-function: steps(var(--n)), linear; }
+  .dt-fauna-swimr { animation-name: dtSheet, dtSwimR; animation-timing-function: steps(var(--n)), linear; }
+  .dt-fauna-bob { animation-name: dtSheet, dtBobble; animation-timing-function: steps(var(--n)), ease-in-out; }
+  .dt-fauna-scuttle { animation-name: dtSheet, dtScuttle; animation-timing-function: steps(var(--n)), ease-in-out; }
+  .dt-scene.paused .dt-fauna { animation-play-state: paused; }
+  /* papillon : il vole en zigzag sur une bonne distance, se retourne dans le sens où il va, se pose un instant */
+  @keyframes dtFlutter { 0% { transform: translate(0, 0); } 12% { transform: translate(260%, -220%); } 22% { transform: translate(520%, -80%); } 32% { transform: translate(780%, -320%); } 40% { transform: translate(900%, -150%); } 41% { transform: translate(900%, -150%) scaleX(-1); } 52% { transform: translate(640%, -420%) scaleX(-1); } 63% { transform: translate(380%, -180%) scaleX(-1); } 74% { transform: translate(120%, -360%) scaleX(-1); } 84% { transform: translate(-60%, -60%) scaleX(-1); } 85%, 92% { transform: translate(0, 0) scaleX(-1); } 93%, 100% { transform: translate(0, 0); } }
+  @keyframes dtSwim { 0% { transform: translate(0, 0); } 46% { transform: translate(-500%, 30%); } 50% { transform: translate(-500%, 30%) scaleX(-1); } 96% { transform: translate(0, 0) scaleX(-1); } 100% { transform: translate(0, 0); } }
+  @keyframes dtSwimR { 0% { transform: translate(0, 0); } 46% { transform: translate(180%, -20%); } 50% { transform: translate(180%, -20%) scaleX(-1); } 96% { transform: translate(0, 0) scaleX(-1); } 100% { transform: translate(0, 0); } }
+  @keyframes dtBobble { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-70%); } }
+  @keyframes dtScuttle { 0%, 100% { transform: translateX(0); } 30% { transform: translateX(70%); } 70% { transform: translateX(-70%); } }
   .dt-ember, .dt-flake { position: absolute; width: calc(100% / 192); aspect-ratio: 1; animation-timing-function: ease-out; animation-fill-mode: forwards; }
   .dt-ember { background: #FFB020; box-shadow: 0 0 6px 2px rgba(255, 120, 30, 0.7); animation-name: dtRise; }
   .dt-flake { background: #FFFFFF; opacity: 0.9; animation-name: dtFall; animation-timing-function: linear; }

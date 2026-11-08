@@ -379,6 +379,7 @@
     { id: "deinocheirus", name: "Deinocheirus", zone: "plaine", diet: "omnivore", weightKg: 6000, rarity: "rare" },
     { id: "gorgosaure", name: "Gorgosaure", zone: "plaine", diet: "carnivore", weightKg: 2400, rarity: "rare" },
     { id: "albertosaure", name: "Albertosaure", zone: "plaine", diet: "carnivore", weightKg: 2500, rarity: "rare" },
+    { id: "utahraptor", name: "Utahraptor", zone: "plaine", diet: "carnivore", weightKg: 500, rarity: "epique" },
     { id: "edmontonia", name: "Edmontonia", zone: "plaine", diet: "herbivore", weightKg: 3000, rarity: "rare" },
     { id: "euoplocephale", name: "Euoplocéphale", zone: "plaine", diet: "herbivore", weightKg: 2700, rarity: "rare" },
     { id: "leptoceratops", name: "Leptoceratops", zone: "plaine", diet: "frugivore", weightKg: 70, rarity: "rare" },
@@ -517,7 +518,7 @@
   // n'apparaissent plus dans les œufs, la boutique ni l'encyclopédie.
   var DP_ACTIVE_SPECIES = {
     foret: { commun: ["compsognathus", "iguanodon", "archaeopteryx", "coelophysis"], rare: ["ceratosaure", "stegosaure", "deinonychus"], epique: ["diplodocus", "allosaure"], legendaire: ["brachiosaure"] },
-    plaine: { commun: ["gallimimus", "pachycephalosaure", "styracosaure", "maiasaura"], rare: ["triceratops", "ankylosaure", "parasaurolophus"], epique: ["albertosaure"], legendaire: ["tyrannosaure"] },
+    plaine: { commun: ["gallimimus", "pachycephalosaure", "styracosaure", "maiasaura"], rare: ["triceratops", "ankylosaure", "parasaurolophus"], epique: ["utahraptor", "albertosaure"], legendaire: ["tyrannosaure"] },
     desert: { commun: ["protoceratops", "oviraptor", "psittacosaure", "mononykus"], rare: ["carnotaurus", "pinacosaure", "pentaceratops"], epique: ["nigersaurus", "alioramus"], legendaire: ["spinosaure"] },
     arctique: { commun: ["troodon", "pachyrhinosaure", "leaellynasaura", "minmi"], rare: ["edmontosaure", "muttaburrasaure", "nanuqsaurus"], epique: ["cryolophosaure", "antarctopelta"], legendaire: ["yutyrannus"] },
     marine: { commun: ["ichtyosaure", "plesiosaure", "nothosaure", "pliosaure"], rare: ["elasmosaure", "kronosaure", "shonisaure"], epique: ["liopleurodon", "tylosaure"], legendaire: ["mosasaure"] },
@@ -596,6 +597,7 @@
     deinocheirus: { folder: "Deinocheirus", face: "Deinocheirus_face.png", profil: "Deinocheirus_profil.png" },
     gorgosaure: { folder: "Gorgosaurus", face: "Gorgosaurus_face.png", profil: "Gorgosaurus_profil.png" },
     albertosaure: { folder: "Albertosaure", face: "Albertosaure_face.png", profil: "Albertosaure_profil.png" },
+    utahraptor: { folder: "Utahraptor", face: "Utahraptor_face.png", profil: "Utahraptor_profil.png" },
     edmontonia: { folder: "Edmontonia", face: "Edmontonia_face.png", profil: "Edmontonia_profil.png" },
     euoplocephale: { folder: "Euoplocephalus", face: "Euoplocephalus_face.png", profil: "Euoplocephalus_profil.png" },
     leptoceratops: { folder: "Leptoceratops", face: "Leptoceratops_face.png", profil: "Leptoceratops_profil.png" },
@@ -663,6 +665,12 @@
   function dpMerchantArtPath(zoneId) {
     return "assets/objects/marchand/Marchand_" + DP_ENCLOS_ZONE_FOLDER[zoneId] + ".png";
   }
+
+  // Couleur tirée au hasard à l'éclosion : teintes réalistes et sobres (rouge désert, brun, ocre, olive,
+  // sable, gris, vert sombre), jamais de rose, violet ou bleu. Les dinos d'avant gardent leur couleur de base.
+  var DP_DINO_COLORS = ["none", "sepia(.6) hue-rotate(-28deg) saturate(1.5) brightness(.8)", "sepia(.7) hue-rotate(-10deg) saturate(1.2) brightness(.85)", "sepia(.65) saturate(1.3) brightness(.95)", "sepia(.55) hue-rotate(25deg) saturate(.9) brightness(.85)", "sepia(.45) saturate(.75) brightness(1.05)", "grayscale(.65) brightness(.85)", "sepia(.5) hue-rotate(48deg) saturate(.8) brightness(.75)"];
+  function dpRandomDinoColor() { return Math.floor(Math.random() * DP_DINO_COLORS.length); }
+  function dpDinoFilterCss(d) { var f = d && d.color ? DP_DINO_COLORS[d.color] : null; return f && f !== "none" ? "filter:" + f + ";" : ""; }
 
   function dpSquareHtml(speciesId, opts) {
     opts = opts || {};
@@ -1034,8 +1042,9 @@
     var zoneGrid = '<div class="dp-zone-grid">' + DP_ZONES.map(function (z) {
       var unlocked = dp.unlockedZones.indexOf(z.id) !== -1;
       if (unlocked) {
-        return '<button class="dp-zone-card" onclick="App.dpGoZone(\'' + z.id + '\')">' +
-          '<div class="dp-zone-portal" style="background-image:url(\'' + dpPortalArtPath(z.id, false) + '\')"></div>' +
+        // le tourbillon du portail tourne (12 images) ; au clic il accélère et t'aspire avant d'entrer
+        return '<button class="dp-zone-card" onclick="App.dpEnterPortal(this, \'' + z.id + '\')">' +
+          '<div class="dp-zone-portal dp-portal-anim" style="background-image:url(\'' + dpPortalArtPath(z.id, false).replace(".png", "_anim.png") + '\')"></div>' +
           '<div class="dp-zone-sign">' + esc(z.name) + '</div>' +
           '</button>';
       }
@@ -1090,7 +1099,7 @@
           '<div class="dp-enc-fallback">' + zone.emoji + '</div>' +
           '<div class="dp-enc-dino-slot">' + (dinos.length ? dinos.map(function (d) {
             var dsc = dpDinoSizeScale(dpSpecies(d.speciesId).weightKg);
-            return '<span class="dp-dino-thumb-wrap" style="width:' + (28 * dsc).toFixed(1) + '%;max-width:' + Math.round(210 * dsc) + 'px">' + dpEnclosureDinoHtml(d.speciesId, ' title="' + esc(dpSpecies(d.speciesId).name) + '" onclick="App.dpSelectDino(\'' + d.id + '\')"') + dpAttentionBadgeHtml(d) + '</span>';
+            return '<span class="dp-dino-thumb-wrap" style="width:' + (28 * dsc).toFixed(1) + '%;max-width:' + Math.round(210 * dsc) + 'px">' + dpEnclosureDinoHtml(d.speciesId, ' style="' + dpDinoFilterCss(d) + '" title="' + esc(dpSpecies(d.speciesId).name) + '" onclick="App.dpSelectDino(\'' + d.id + '\')"') + dpAttentionBadgeHtml(d) + '</span>';
           }).join("") : '<span class="dp-enc-empty-hint">Vide</span>') + '</div>' +
           '</div>' +
           '<div class="dp-enc-sign">' +
@@ -1108,7 +1117,7 @@
     var unplaced = dpUnplacedDinosaurs().filter(function (d) { return dpSpecies(d.speciesId).zone === zoneId; });
     var unplacedHtml = unplaced.length ? '<div class="dp-section"><h3 class="dp-section-title">🦕 En attente d\'un enclos</h3><div class="dp-enclosure-dinos">' +
       unplaced.map(function (d) {
-        return '<span class="dp-dino-thumb-wrap">' + dpSquareHtml(d.speciesId, { attrs: ' title="' + esc(dpSpecies(d.speciesId).name) + '" onclick="App.dpSelectDino(\'' + d.id + '\')"' }) + dpAttentionBadgeHtml(d) + dpPlacementCountdownHtml(d) + '</span>';
+        return '<span class="dp-dino-thumb-wrap">' + dpSquareHtml(d.speciesId, { style: dpDinoFilterCss(d), attrs: ' title="' + esc(dpSpecies(d.speciesId).name) + '" onclick="App.dpSelectDino(\'' + d.id + '\')"' }) + dpAttentionBadgeHtml(d) + dpPlacementCountdownHtml(d) + '</span>';
       }).join("") + '</div></div>' : "";
 
     renderShell(["dinopark"], dpDecorHtml() + backBtn + head + shop + enclosures + unplacedHtml);
@@ -1353,10 +1362,13 @@
   // affiché retourné). pivot = x des hanches dans l'image : il se retourne autour d'elles, pas du centre.
   // « marche » : stride = distance parcourue par un cycle de pas, en pixels de l'image, pour caler
   // les pattes sur la vitesse réelle (pas de glissade).
-  function dpAnimSet(name, w, h, pivot, stride) {
+  // « special » (légendaires seulement) : 18 images jouées une fois, de profil ; shake = images où l'écran tremble
+  function dpAnimSet(name, w, h, pivot, stride, shake) {
     var part = function (kind, n, ms) { return { file: name + "_" + kind + ".png", n: n, w: w, h: h, ms: ms }; }, marche = part("marche", 8, 95);
     marche.stride = stride; marche.pivot = pivot;
-    return { marche: marche, repos: part("repos", 12, 170), tourne: part("tourne", 4, 110), virage1: part("virage1", 6, 95), virage2: part("virage2", 6, 95), regard: part("regard", 12, 170) };
+    var set = { marche: marche, repos: part("repos", 12, 170), tourne: part("tourne", 4, 110), virage1: part("virage1", 6, 95), virage2: part("virage2", 6, 95), regard: part("regard", 12, 170) };
+    if (shake) { set.special = part("special", 18, 130); set.special.shake = shake; }
+    return set;
   }
   var DP_ANIM = {
     iguanodon: dpAnimSet("Iguanodon", 102, 43, 51, 18),
@@ -1367,7 +1379,17 @@
     deinonychus: dpAnimSet("Deinonychus", 102, 39, 45, 20),
     diplodocus: dpAnimSet("Diplodocus", 144, 49, 61, 16),
     allosaure: dpAnimSet("Allosaure", 104, 37, 47, 22),
-    brachiosaure: dpAnimSet("Brachiosaure", 112, 56, 53, 16),
+    brachiosaure: dpAnimSet("Brachiosaure", 112, 86, 53, 16, [12, 13, 14, 15]),
+    gallimimus: dpAnimSet("Gallimimus", 98, 45, 44, 20),
+    pachycephalosaure: dpAnimSet("Pachycephalosaure", 94, 37, 45, 16),
+    styracosaure: dpAnimSet("Styracosaure", 106, 41, 62, 14),
+    maiasaura: dpAnimSet("Maiasaura", 110, 39, 55, 18),
+    triceratops: dpAnimSet("Triceratops", 106, 35, 62, 14),
+    ankylosaure: dpAnimSet("Ankylosaure", 104, 25, 47, 12),
+    parasaurolophus: dpAnimSet("Parasaurolophus", 112, 60, 57, 20),
+    utahraptor: dpAnimSet("Utahraptor", 104, 42, 45, 20),
+    albertosaure: dpAnimSet("Albertosaure", 106, 38, 54, 22),
+    tyrannosaure: dpAnimSet("Tyrannosaure", 124, 70, 61, 24, []),
     compsognathus: {
       marche: { file: "Compsognathus_marche.png", n: 8, w: 90, h: 43, ms: 95, stride: 16.4, pivot: 33.4 },
       repos: { file: "Compsognathus_repos.png", n: 12, w: 90, h: 43, ms: 170 },
@@ -1411,12 +1433,31 @@
   }
 
   // ---- Décor vivant de l'enclos : 3 positions de vent pour les arbres, nuages qui dérivent,
-  // oiseaux (ou poissons) qui passent, braises sur le volcan, flocons en arctique.
+  // oiseaux (ou poissons) qui passent, petits animaux qui bougent, braises sur le volcan, flocons en arctique.
+  // Petits animaux du décor (papillons, lapins, lézards, poissons…), animés à part du terrain.
+  // Planche : [largeur, hauteur, nombre d'images, ms par image, ancrage x, ancrage y, déplacement, couleurs]
+  var DT_FAUNA_SHEET = {
+    butterfly: [5, 4, 4, 90, 2, 3, "flutter", 4], bunny: [7, 7, 20, 180, 1, 5, "", 0], lizard: [10, 4, 14, 200, 1, 2, "", 0],
+    scorpion: [7, 7, 11, 160, 1, 5, "", 0], penguin: [5, 8, 14, 160, 1, 6, "", 0], fox: [11, 6, 14, 170, 3, 4, "", 0],
+    fish: [5, 3, 2, 230, 0, 1, "swim", 2], turtle: [9, 5, 2, 300, 0, 4, "swimr", 0], jelly: [3, 6, 2, 260, 0, 2, "bob", 0],
+    crab: [6, 5, 8, 170, 1, 3, "scuttle", 0], salamander: [8, 3, 8, 200, 0, 1, "", 0], ember: [2, 2, 8, 140, 0, 1, "", 0]
+  };
+  // par terrain : [animal, x, y (en pixels du terrain 192 × 108), couleur, devant la piste ?]
+  var DT_FAUNA = {"foret_1":[["butterfly",135,52,2,0]],"foret_2":[["butterfly",112,76,1,1],["bunny",190,102,0,1],["butterfly",92,47,3,0]],"foret_3":[["butterfly",55,53,2,0],["bunny",54,65,0,0],["butterfly",120,65,0,0],["butterfly",141,67,1,0],["bunny",44,104,0,1],["butterfly",89,69,1,0],["butterfly",37,84,3,1],["bunny",139,97,0,1],["butterfly",85,51,3,0]],"plaine_1":[["butterfly",163,67,3,0]],"plaine_2":[["butterfly",49,47,3,0],["bunny",88,72,0,0],["lizard",110,67,0,0],["butterfly",117,58,1,0],["butterfly",133,62,2,0]],"plaine_3":[["butterfly",114,52,3,0],["bunny",76,99,0,1],["lizard",74,78,0,0],["butterfly",38,53,0,0],["butterfly",111,80,1,0],["bunny",101,96,0,1],["lizard",145,70,0,0],["butterfly",52,43,0,0],["butterfly",18,76,1,1],["bunny",52,69,0,0],["lizard",21,102,0,1],["butterfly",61,53,1,0],["butterfly",180,72,2,0]],"desert_1":[["lizard",105,77,0,0],["scorpion",132,68,0,0]],"desert_2":[["lizard",119,96,0,1],["scorpion",78,72,0,0],["lizard",32,101,0,1],["lizard",112,71,0,0],["scorpion",75,69,0,0]],"desert_3":[["lizard",126,102,0,1],["scorpion",60,73,0,0],["lizard",193,100,0,1],["lizard",11,99,0,1],["scorpion",107,65,0,0],["lizard",118,104,0,1],["lizard",101,96,0,1],["scorpion",145,70,0,0],["lizard",124,67,0,0],["lizard",90,100,0,1],["scorpion",133,102,0,1],["lizard",21,102,0,1]],"arctique_1":[["penguin",113,99,0,1],["fox",115,71,0,0]],"arctique_2":[["penguin",17,102,0,1],["fox",57,69,0,0],["penguin",183,103,0,1],["penguin",23,101,0,1],["fox",56,72,0,0]],"arctique_3":[["penguin",65,68,0,0],["fox",159,99,0,1],["penguin",116,99,0,1],["penguin",59,70,0,0],["fox",86,103,0,1],["penguin",94,102,0,1],["penguin",73,100,0,1],["fox",122,77,0,0],["penguin",116,76,0,0],["penguin",112,97,0,1],["fox",179,97,0,1],["penguin",120,74,0,0]],"marine_1":[["fish",113,91,0,1],["turtle",110,101,0,1]],"marine_2":[["fish",139,67,0,0],["turtle",114,77,0,0],["jelly",139,83,0,1],["fish",91,79,0,0],["crab",51,68,0,0],["fish",159,69,1,0]],"marine_3":[["fish",43,92,0,1],["turtle",128,68,0,0],["jelly",133,89,0,1],["fish",108,79,1,1],["crab",13,98,0,1],["fish",67,57,1,0],["fish",48,71,1,0],["turtle",53,67,0,0],["jelly",99,86,0,1],["fish",114,52,0,0],["crab",53,67,0,0],["fish",83,59,0,0],["fish",80,68,0,0],["turtle",115,101,0,1],["jelly",83,39,0,0],["fish",54,78,0,0]],"volcanique_1":[["salamander",60,66,0,0],["ember",62,81,0,0]],"volcanique_2":[["salamander",79,67,0,0],["ember",77,68,0,0],["ember",129,76,0,0],["salamander",115,78,0,0],["ember",46,78,0,0],["salamander",141,75,0,0]],"volcanique_3":[["salamander",132,72,0,0],["ember",163,87,0,0],["ember",93,94,0,1],["salamander",108,68,0,0],["ember",51,86,0,0],["salamander",116,75,0,0],["ember",129,80,0,0],["ember",141,90,0,0],["salamander",115,73,0,0],["ember",72,72,0,0],["salamander",3,104,0,1],["ember",60,79,0,0],["ember",51,99,0,1],["salamander",70,78,0,0],["ember",37,101,0,1],["salamander",178,98,0,1]]};
+  function dtFaunaHtml(zoneId, level, front) {
+    var nb = 0;   // 2 papillons au plus par enclos
+    return (DT_FAUNA[zoneId + "_" + level] || []).filter(function (a) { return a[0] !== "butterfly" || ++nb <= 2; }).filter(function (a) { return !!a[4] === front; }).map(function (a, i) {
+      var S = DT_FAUNA_SHEET[a[0]], file = "faune_" + a[0] + (S[7] ? "_" + a[3] : "") + ".png", dur = S[2] * S[3], move = S[6] ? 5000 + ((a[1] * 37 + a[2] * 11) % 5) * 1300 : 0;
+      return '<div class="dt-fauna' + (S[6] ? " dt-fauna-" + S[6] : "") + '" style="left:' + ((a[1] - S[4]) / 192 * 100).toFixed(2) + '%;top:' + ((a[2] - S[5]) / 108 * 100).toFixed(2) + '%;width:' + (S[0] / 192 * 100).toFixed(3) + '%;aspect-ratio:' + S[0] + '/' + S[1] +
+        ';--n:' + S[2] + ';background-image:url(assets/dinotime/anim/' + file + ');animation-duration:' + dur + 'ms' + (move ? ', ' + move + 'ms' : '') + ';animation-delay:-' + ((i * 397) % dur) + 'ms' + (move ? ', -' + ((i * 1777) % move) + 'ms' : '') + '"></div>';
+    }).join("");
+  }
   var DT_SKY_ZONES = { foret: 1, plaine: 1, desert: 1, arctique: 1 };
   function dtAnimFrame(zoneId, level, i) { return "assets/dinotime/anim/enclos_" + (DP_DINOTIME_ZONE_FOLDER[zoneId] || zoneId) + "_level" + level + "_" + i + ".png"; }
   function dtDecorHtml(zoneId, level) {
     var h = '<div class="dt-stage" id="dt-stage">';
     for (var i = 0; i < 3; i++) h += '<img class="dt-stage-frame" id="dt-wind-' + i + '" src="' + dtAnimFrame(zoneId, level, i) + '" alt=""' + (i ? ' style="visibility:hidden"' : "") + ' onerror="this.remove()">';
+    h += dtFaunaHtml(zoneId, level, false);
     if (DT_SKY_ZONES[zoneId]) [[22, 6, "petit", 210], [82, 12, "grand", 260], [122, 4, "petit", 190], [170, 15, "grand", 300]].forEach(function (c) {
       var wpx = c[2] === "grand" ? 36 : 28, x = c[0] / 192 * 100, dur = c[3];
       h += '<img class="dt-cloud" src="assets/dinotime/anim/nuage_' + c[2] + '.png" alt="" style="top:' + (c[1] / 108 * 100).toFixed(2) + '%;width:' + (wpx / 192 * 100).toFixed(2) + '%;animation-duration:' + dur + 's;animation-delay:-' + ((x + 20) / 130 * dur).toFixed(1) + 's">';
@@ -1427,6 +1468,7 @@
   function dtDecorFrontHtml(zoneId, level) {
     var h = '<div class="dt-stage dt-stage-front">';
     for (var i = 0; i < 3; i++) h += '<img class="dt-stage-frame" id="dt-windf-' + i + '" src="' + dtAnimFrame(zoneId, level, "avant_" + i) + '" alt=""' + (i ? ' style="visibility:hidden"' : "") + ' onerror="this.remove()">';
+    h += dtFaunaHtml(zoneId, level, true);
     return h + "</div>";
   }
   var dtDecorTimers = [];
@@ -1611,6 +1653,7 @@
     }
     return {
       speciesId: d.speciesId,
+      filterCss: dpDinoFilterCss(d),
       hasArt: !!DP_ART[d.speciesId],
       anim: !!(DP_ANIM[d.speciesId] && DP_ART[d.speciesId]),
       heightPx: Math.round(heightPx),
@@ -1642,7 +1685,7 @@
       // dino animé : il se retourne autour de ses hanches (pas du centre de l'image), sinon il « sauterait »
       var pivot = ds.anim ? dpAnim(ds.speciesId, "marche") : null;
       if (ds.anim) dpPreloadAnim(ds.speciesId);
-      return '<span class="dt-dino-wrap" id="dt-dino-wrap-' + i + '" style="left:' + ds.x + '%;height:' + ds.heightPx + 'px;' + dtLaneStyle(ds.laneF) + (pivot && pivot.pivot ? ";transform-origin:" + (pivot.pivot / pivot.w * 100).toFixed(1) + "% 100%" : "") + '">' + dtDinoVisualHtml(ds, i) + '</span>';
+      return '<span class="dt-dino-wrap" id="dt-dino-wrap-' + i + '" style="left:' + ds.x + '%;height:' + ds.heightPx + 'px;' + ds.filterCss + dtLaneStyle(ds.laneF) + (pivot && pivot.pivot ? ";transform-origin:" + (pivot.pivot / pivot.w * 100).toFixed(1) + "% 100%" : "") + '">' + dtDinoVisualHtml(ds, i) + '</span>';
     }).join("");
     var html = '<div class="dt-scene" style="background-color:' + zone.color + '">' +
       '<img class="dt-scene-bg" src="' + bg + '" alt="" onerror="this.style.display=\'none\'">' +
@@ -1772,6 +1815,21 @@
       dpPlayOnce(el, v2, false, function () { ds.turning = null; dpApplyAnim(el, walkA, dtWalkCycleMs(ds, walkA)); }, half);
     }, half);
   }
+  // animation spéciale d'un légendaire, jouée une fois de profil ; l'écran tremble sur les images « shake »
+  function dtPlaySpecial(ds, el, spec, next) {
+    var a = DP_ANIM[ds.speciesId].special, dur = spec.n * spec.ms, t0 = performance.now(), scene = document.querySelector(".dt-scene");
+    ds.modeUntil = Math.max(ds.modeUntil, t0 + dur + 2500);   // il a le temps de finir avant de changer d'activité
+    dpPlayOnce(el, spec, false, function () { if (scene) scene.style.transform = ""; next(); }, dur);
+    if (!scene || !a.shake || !a.shake.length) return;
+    var tick = function () {
+      if (!el.isConnected) { scene.style.transform = ""; return; }
+      var t = performance.now() - t0, f = Math.floor(t / spec.ms);
+      if (f >= spec.n) { scene.style.transform = ""; return; }
+      scene.style.transform = a.shake.indexOf(f) >= 0 ? "translate(" + (Math.random() * 10 - 5).toFixed(1) + "px," + (Math.random() * 8 - 4).toFixed(1) + "px)" : "";
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
   function dtSetLane(wrap, f) {
     wrap.style.bottom = "calc(50% + max(100%, 56.25vw) * " + (0.5 - f).toFixed(4) + ")";
     wrap.style.zIndex = 1 + Math.round(Math.max(0, Math.min(1, (f - DT_LANE_F0) / (DT_LANE_F1 - DT_LANE_F0))) * 3);
@@ -1795,7 +1853,9 @@
             var a = dpAnim(ds.speciesId, ds.mode === "walk" ? "marche" : ds.mode === "look" ? "regard" : "repos");
             var cycleMs = ds.mode === "walk" ? dtWalkCycleMs(ds, a) : null;
             var turn = dpAnim(ds.speciesId, "tourne"), el0 = img;
-            if (turn && ds.mode === "look") dpPlayOnce(img, turn, false, function () { dpApplyAnim(el0, a); });          // il se tourne vers toi
+            var spec = ds.mode === "look" && Math.random() < 0.5 ? dpAnim(ds.speciesId, "special") : null;
+            if (spec && turn) dtPlaySpecial(ds, img, spec, function () { dpPlayOnce(el0, turn, false, function () { dpApplyAnim(el0, a); }); });   // légendaire : rugissement (ou il se dresse), puis il te regarde
+            else if (turn && ds.mode === "look") dpPlayOnce(img, turn, false, function () { dpApplyAnim(el0, a); });          // il se tourne vers toi
             else if (turn && ds.lastMode === "look") dpPlayOnce(img, turn, true, function () { dpApplyAnim(el0, a, cycleMs); });   // il se remet de profil
             else dpApplyAnim(img, a, cycleMs);
           } else img.classList.toggle("dt-dino-walking", ds.mode === "walk");
