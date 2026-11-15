@@ -1756,6 +1756,14 @@
   var NB_LEAD_EMOJI = new RegExp("^(?:\\s|[" + String.fromCharCode(0x2190) + "-" + String.fromCharCode(0x2BFF) + String.fromCharCode(0xFE0F) + String.fromCharCode(0x200D) + "]|[" + String.fromCharCode(0xD83C) + "-" + String.fromCharCode(0xD83E) + "][" + String.fromCharCode(0xDC00) + "-" + String.fromCharCode(0xDFFF) + "])+");
   var nbRot = 0;
   function nbTilt(max) { nbRot++; var v = Math.sin(nbRot * 12.9898) * 43758.5453; v = v - Math.floor(v); return ((v * 2 - 1) * max).toFixed(2) + "deg"; }
+  function nbScalableSvg(svg) {
+    return String(svg || "").replace(/<svg\b([^>]*)>/i, function (m, attrs) {
+      var w = /\swidth\s*=\s*["']?([\d.]+)(?:px)?["']?/i.exec(attrs), h = /\sheight\s*=\s*["']?([\d.]+)(?:px)?["']?/i.exec(attrs);
+      if (!/viewBox/i.test(attrs) && w && h) attrs += ' viewBox="0 0 ' + w[1] + ' ' + h[1] + '"';
+      if (/viewBox/i.test(attrs)) attrs = attrs.replace(/\s(width|height)\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "");
+      return "<svg" + attrs + ' preserveAspectRatio="xMidYMid meet">';
+    });
+  }
   function nbCalloutHtml(ctype, title, lines, figures, nestedOpts) {
     var body = function () { return mdToHtml(lines.join("\n"), figures, nestedOpts); };
     var t = title ? inlineMdPlain(title) : "";
@@ -1872,7 +1880,7 @@
             var id = m[2].replace(/^(figure|schema):/, "");
             var f = (figures || []).find(function (x) { return x.id === id; });
             if (!f) out += '<span class="prose-figure-removed">🚫 Schéma supprimé</span>';
-            else if (m[2].indexOf("schema:") === 0) out += '<span class="table-figure table-schema">' + f.svg + '</span>';
+            else if (m[2].indexOf("schema:") === 0) out += '<span class="table-figure table-schema">' + (opts.fiche ? nbScalableSvg(f.svg) : f.svg) + '</span>';
             else out += '<img class="table-figure" src="' + figureSrc(f) + '" alt="' + esc(m[1]) + '" title="' + esc(m[1]) + '" onclick="App.openFigureLightbox(this.src)">';
             last = re.lastIndex;
           }
@@ -1913,7 +1921,7 @@
           // tel quel, inséré inline plutôt que via <img src>.
           var refSchema = (figures || []).find(function (f) { return f.id === schemaRef[1]; });
           if (refSchema) {
-            html += '<figure class="prose-figure prose-schema">' + refSchema.svg + (imgLine[1] ? "<figcaption>" + esc(imgLine[1]) + "</figcaption>" : "") + "</figure>";
+            html += '<figure class="prose-figure prose-schema">' + (opts.fiche ? nbScalableSvg(refSchema.svg) : refSchema.svg) + (imgLine[1] ? "<figcaption>" + esc(imgLine[1]) + "</figcaption>" : "") + "</figure>";
           }
         } else {
           html += '<figure class="prose-figure"><img src="' + imgLine[2] + '" alt="' + esc(imgLine[1]) + '" onclick="App.openFigureLightbox(this.src)">' + (imgLine[1] ? "<figcaption>" + esc(imgLine[1]) + "</figcaption>" : "") + "</figure>";
@@ -1958,6 +1966,7 @@
         var tag = headingMatch[1].length <= 2 ? "h3" : "h4";
         // Fiche : chaque bandeau de section a son dino blanc, une espèce différente à chaque section.
         if (opts.fiche) {   // fiche « cahier » : titre écrit à la main, numéro entouré et dino autocollant dans la marge
+          var nxt = i + 1; while (nxt < lines.length && !lines[nxt].trim()) nxt++; if (nxt < lines.length && /^>\s*\[!\s*(quiz|test)/i.test(lines[nxt].trim())) continue;
           var htxt = headingMatch[2].replace(NB_LEAD_EMOJI, "");   // sans l'emoji du début : un élève n'en met pas dans ses titres
           if (tag === "h3" && !opts.nested) {
             var n = ++sectionCount, sp = SECTION_DINOS[(n - 1) % SECTION_DINOS.length];

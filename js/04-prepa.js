@@ -741,7 +741,7 @@
   // imperfection, en étalant la sanction sur plusieurs paliers intermédiaires.
   var GRADE_LEVELS = {
     correct: { label: "Correct", cls: "correct", masteryFactor: 1, pointsFactor: 1 },
-    minor: { label: "1 erreur", cls: "minor", masteryFactor: 0.6, pointsFactor: 0.8 },
+    minor: { label: "Presque maîtrisé", cls: "minor", masteryFactor: 0.6, pointsFactor: 0.8 },
     moderate: { label: "Partiellement maîtrisé", cls: "moderate", masteryFactor: 0.45, pointsFactor: 0.45 },
     major: { label: "Insuffisamment maîtrisé", cls: "major", masteryFactor: 0.6, pointsFactor: 0.15 },
     wrong: { label: "Faux", cls: "wrong", masteryFactor: 1, pointsFactor: 0 }
@@ -800,7 +800,8 @@
     var parts = drawingParts(drawn.images).concat([{ text: promptText }]);
     var result = await callGemini(parts, EXERCISE_GRADE_SCHEMA);
     result.mistakes = result.mistakes || [];
-    result.level = gradeLevelFromMistakeCount(result.mistakes.length);
+    var ratio = result.scoreMax > 0 && typeof result.score === "number" ? result.score / result.scoreMax : null;
+    result.level = ratio === null ? gradeLevelFromMistakeCount(result.mistakes.length) : ratio >= 0.95 ? "correct" : ratio >= 0.8 ? "minor" : ratio >= 0.55 ? "moderate" : ratio >= 0.3 ? "major" : "wrong";
     return result;
   }
 

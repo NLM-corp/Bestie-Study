@@ -569,7 +569,7 @@
     "Structure :\n" +
     "1. Commence par « > [!essentiel] » : 3 à 5 lignes « - … » qui disent l'idée générale du chapitre (il s'affiche sur un post-it « Si tu ne retiens que ça »).\n" +
     "2. Puis une partie par grande notion : « ## Titre ». Sous-parties avec « ### Titre ».\n" +
-    "3. Termine par « > [!quiz] » : 5 à 8 questions qui couvrent les points les plus importants, une par ligne au format « > Question ? => Réponse courte ».\n\n" +
+    "3. Termine par « > [!quiz] » (sans titre de partie juste avant) : 5 à 8 questions qui couvrent les points les plus importants, une par ligne au format « > Question ? => Réponse courte ».\n\n" +
     "Encadrés (une ligne « > [!type] Titre optionnel », puis le contenu sur des lignes qui commencent aussi par « > ») :\n" +
     "- [!def] Terme → une définition, écrite sur une petite fiche bristol : le titre est le terme, le contenu la définition courte. Une par terme important du cours.\n" +
     "- [!formule] Nom → une formule, une règle ou une loi à savoir par cœur (encadrée au stylo), avec ce que veut dire chaque lettre et son unité.\n" +

@@ -1710,7 +1710,7 @@ mark.fi-key { background: linear-gradient(transparent 38%, var(--c-mark) 38%, va
   .print-nb .nb, .print-nb .nb * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .nb-postit, .nb-bristol, .nb-formule, .nb-talk, .nb-retenir, .nb-methode, .nb .prose-figure, .nb table, .nb .nb-frise, .nb .fiche-cols, .nb-ex, .nb tr, .nb-q, .nb .ff-item { break-inside: avoid; page-break-inside: avoid; }
   .nb h3.nb-h, .nb .nb-h4 { break-after: avoid; page-break-after: avoid; }
-  .nb-q-a span { visibility: visible; display: inline-block; transform: rotate(180deg); }   /* sur papier : réponses écrites à l'envers */
+  .nb-q-a span { visibility: visible; }
   .nb-q-a::after { content: none; }
 }
 .nb { line-height: 1.42; padding: 1.1em 1em 1.2em var(--margin-x); }
@@ -1743,3 +1743,15 @@ mark.fi-key { background: linear-gradient(transparent 38%, var(--c-mark) 38%, va
 .nb-postit { margin: 0.7em 0.3em 1.2em; }
 .nb-bristol { margin: 0.75em 0 0.95em; }
 .nb .prose-photo { margin: 1em auto 1.1em; }
+.nb.nb tbody tr td, .nb.nb tbody tr:nth-child(even) td { background: rgba(255, 255, 255, 0.55); color: var(--ink); }
+.nb.nb tbody tr:nth-child(even) td { background: rgba(70, 120, 200, 0.06); }
+.nb th, .nb td { word-break: normal; overflow-wrap: break-word; hyphens: manual; }
+.nb .prose-schema svg { width: 100%; max-width: 680px; height: auto; max-height: none; }
+.nb .table-schema svg { width: 100%; height: auto; }
+.nb td .table-figure, .nb td .table-schema { width: 100%; min-width: 15em; max-height: none; }
+@media print {
+  .nb .prose-schema svg { max-width: 100%; }
+  .nb td .table-figure, .nb td .table-schema { min-width: 17em; }
+  .nb-q-a span { transform: none; }
+  .nb-q-a > span { visibility: visible; display: inline-block; transform: rotate(180deg); }
+}
