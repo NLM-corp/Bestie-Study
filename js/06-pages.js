@@ -1056,7 +1056,7 @@
     var subj = findSubject(sheet.subjectId);
     var theme = subj && findTheme(subj, sheet.themeId);
     var chap = theme && findChapter(theme, sheet.chapterId);
-    var head = '<div class="course-head"><div><h1 class="page-title" style="margin-bottom:6px">📋 ' + esc(sheet.title) + '</h1>' +
+    var head = '<div class="course-head"><div><h1 class="page-title" style="margin-bottom:6px' + (sheet.status === "ready" ? ";display:none" : "") + '">📋 ' + esc(sheet.title) + '</h1>' +
       '<p class="page-sub">' + (subj ? esc(subj.name) : "") + (theme ? ' · ' + esc(theme.name) : "") + (chap ? ' · ' + esc(chap.name) : "") + ' · Fiche de ' + (sheet.scope === "course" ? "cours" : sheet.scope === "theme" ? "thème" : "chapitre") + '</p></div>' +
       '<div style="display:flex;gap:10px;margin-left:auto;align-items:center">' +
       (sheet.status === "ready" ? '<div class="print-scale-ctrl" title="Taille de la police à l\'impression"><button class="btn btn-ghost btn-sm" style="width:auto;padding:4px 10px" onclick="App.adjustPrintScale(-0.1)">−</button><span class="mono" style="min-width:42px;text-align:center;display:inline-block">' + Math.round(getPrintScale() * 100) + '%</span><button class="btn btn-ghost btn-sm" style="width:auto;padding:4px 10px" onclick="App.adjustPrintScale(0.1)">+</button></div>' : "") +
@@ -1076,8 +1076,8 @@
         '<button class="btn btn-primary" style="width:auto;margin-top:14px" onclick="App.retryRevisionSheetGeneration(\'' + sheet.id + '\')">Réessayer</button>' +
         '</div></div>';
     } else {
-      body = (sheet.format === 2 ? ficheLegendHtml() : '<div class="fiche-upgrade"><span>✨ Nouvelle mise en page disponible : couleurs, encadrés, images et schémas plus clairs.</span><button class="btn btn-primary btn-sm" style="width:auto" onclick="App.retryRevisionSheetGeneration(\'' + sheet.id + '\')">🔄 Régénérer la fiche</button></div>') +
-        '<div class="prose fiche">' + mdToHtml(sheet.content, sheetFigureList(sheet), { fiche: true }) + '</div>' + exerciseFigureHtml({ prompt: sheet.content });
+      body = (sheet.format === 3 ? "" : '<div class="fiche-upgrade"><span>✨ Nouvelle fiche disponible : réécrite comme dans le cahier d\'un élève, plus facile à lire et à retenir.</span><button class="btn btn-primary btn-sm" style="width:auto" onclick="App.retryRevisionSheetGeneration(\'' + sheet.id + '\')">🔄 Régénérer la fiche</button></div>') +
+        '<div class="prose nb-screen">' + nbSheetHtml(sheet, subj ? subj.name : "", chap ? chap.name : (theme ? theme.name : "")) + '</div>' + exerciseFigureHtml({ prompt: sheet.content });
     }
     renderShell(["revision", sheetId], head + body, { narrow: true });
   }
@@ -1700,15 +1700,21 @@
       ".......d..d......"
     ],
     bebe: [
-      "...bbbb...",
-      "..bebbbb..",
-      "..bbbbbb..",
-      ".wbwbbwbw.",
-      ".wwwwwwwww",
-      ".wwwswwwww",
-      ".wwwwwwsww",
-      "..wwwwwww.",
-      "...wwwww.."
+      "......bbbb....",
+      ".....bbbbbb...",
+      "....bbbebbbb..",
+      "..bbbbbbbbbb..",
+      "..dddddbbbbb..",
+      "...lllbbbbb...",
+      ".w..w.bbbbw.w.",
+      ".ww.wwbbbbwww.",
+      "wwwwwlbbbbwwww",
+      "wwswwwlllwwwsw",
+      "wwwwwwwwwwwwww",
+      ".wwswwwwwswww.",
+      ".wwwwwwwwwwww.",
+      "..wwwwwwwwww..",
+      "....wwwwww...."
     ]
   };
   var FICHE_DINO_FOR = { essentiel: "trex", def: "diplo", formule: "tricera", exemple: "stego", piege: "raptor", methode: "ankylo", retenir: "ptero", astuce: "bebe", quiz: "trex" };
@@ -1738,6 +1744,60 @@
     var k = String(raw || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z]/g, "");
     k = CALLOUT_ALIASES[k] || k;
     return CALLOUT_TYPES[k] ? k : null;
+  }
+  /* ---------------- Fiches « cahier » ----------------
+     La fiche ressemble à une page du cahier d'un bon élève, pas à un document généré : papier à petits
+     carreaux avec la marge rouge, titres écrits à la main, surligneurs fluo, définitions sur des petites
+     fiches bristol, l'essentiel sur un post-it scotché, formules encadrées au stylo, « à retenir » tamponné,
+     photos collées comme des polaroïds. Les petits dinos vivent dans la marge (autocollants à chaque partie)
+     et ce sont eux qui préviennent des pièges et donnent les astuces, dans une bulle. Le quiz de fin se joue
+     « feuille pliée » : les réponses sont cachées (à l'écran on clique, sur papier elles sont à l'envers). */
+  var NB_STICKER_COLORS = ["#4C8C4A", "#2F7FC1", "#D9A51B", "#D14B35", "#7A4FC4", "#E07B1A", "#D44C80"];
+  var NB_LEAD_EMOJI = new RegExp("^(?:\\s|[" + String.fromCharCode(0x2190) + "-" + String.fromCharCode(0x2BFF) + String.fromCharCode(0xFE0F) + String.fromCharCode(0x200D) + "]|[" + String.fromCharCode(0xD83C) + "-" + String.fromCharCode(0xD83E) + "][" + String.fromCharCode(0xDC00) + "-" + String.fromCharCode(0xDFFF) + "])+");
+  var nbRot = 0;
+  function nbTilt(max) { nbRot++; var v = Math.sin(nbRot * 12.9898) * 43758.5453; v = v - Math.floor(v); return ((v * 2 - 1) * max).toFixed(2) + "deg"; }
+  function nbCalloutHtml(ctype, title, lines, figures, nestedOpts) {
+    var body = function () { return mdToHtml(lines.join("\n"), figures, nestedOpts); };
+    var t = title ? inlineMdPlain(title) : "";
+    switch (ctype) {
+      case "essentiel":   // post-it scotché
+        return '<div class="nb-postit" style="--tilt:' + nbTilt(1.4) + '"><div class="nb-postit-t">' + (t || "Si tu ne retiens que ça") + '</div>' + body() + '</div>';
+      case "def":         // petite fiche bristol : le mot en haut, la définition sur les lignes
+        return '<div class="nb-bristol" style="--tilt:' + nbTilt(0.8) + '"><div class="nb-bristol-t">' + (t || "Définition") + '</div><div class="nb-bristol-b">' + body() + '</div></div>';
+      case "formule":     // encadré au stylo, à savoir par cœur
+        return '<div class="nb-formule"><span class="nb-formule-tag">par cœur !</span>' + (t ? '<div class="nb-formule-t">' + t + '</div>' : "") + body() + '</div>';
+      case "exemple":     // à l'encre verte, avec une accolade
+        return '<div class="nb-ex"><span class="nb-ex-tag">ex :</span>' + (t ? '<div class="nb-ex-t">' + t + '</div>' : "") + body() + '</div>';
+      case "methode":     // étapes numérotées entourées
+        return '<div class="nb-methode"><div class="nb-methode-t">' + (t || "Méthode") + '</div>' + body() + '</div>';
+      case "retenir":     // coup de tampon
+        return '<div class="nb-retenir"><span class="nb-stamp" style="--tilt:' + nbTilt(4) + '">À retenir</span><div class="nb-retenir-b">' + (t ? '<b>' + t + '</b> ' : "") + body() + '</div></div>';
+      case "piege":       // le raptor prévient, dans une bulle
+        return '<div class="nb-talk nb-talk-piege">' + ficheDinoHtml("raptor", "#D14B35", "nb-talk-dino", 4) + '<div class="nb-bubble"><div class="nb-bubble-t">' + (t || "Attention, piège !") + '</div>' + body() + '</div></div>';
+      case "astuce":      // le bébé dino souffle l'astuce
+        return '<div class="nb-talk nb-talk-astuce">' + ficheDinoHtml("bebe", "#D44C80", "nb-talk-dino", 4) + '<div class="nb-bubble"><div class="nb-bubble-t">' + (t || "Astuce pour retenir") + '</div>' + body() + '</div></div>';
+      case "quiz": {      // feuille pliée : questions à gauche, réponses cachées à droite
+        var qs = lines.filter(function (l) { return l.trim(); }).map(function (l, k) {
+          var qa = l.replace(/^[-*]\s+|^\d+[.)]\s+/, "").split(/\s*=>\s*/);
+          return '<div class="nb-q" onclick="this.classList.toggle(\'open\')"><div class="nb-q-q"><span class="nb-q-n">' + (k + 1) + '</span>' + inlineMdPlain(qa[0]) + '</div><div class="nb-q-a"><span>' + inlineMdPlain(qa.slice(1).join(" => ") || "…") + '</span></div></div>';
+        }).join("");
+        return '<div class="nb-quiz"><div class="nb-quiz-t">' + (t || "Teste-toi") + ' <small>(plie la feuille sur les pointillés)</small></div>' + qs + '</div>';
+      }
+    }
+    return '<div class="nb-note">' + (t ? '<b>' + t + '</b>' : "") + body() + '</div>';
+  }
+  // Toute la page de la fiche (à l'écran et à l'impression) : en-tête écrit à la main, code couleur, contenu.
+  function nbSheetHtml(sheet, subjectName, chapterName) {
+    nbRot = 0;
+    var kind = sheet.scope === "theme" ? "fiche de thème" : sheet.scope === "course" ? "fiche de cours" : "fiche de chapitre";
+    return '<div class="nb">' +
+      '<div class="nb-head">' + ficheDinoHtml("trex", "#4C8C4A", "nb-head-dino", 4) +
+      '<div class="nb-head-sub">' + esc(subjectName || "") + (chapterName ? ' · ' + esc(chapterName) : "") + ' — ' + kind + '</div>' +
+      '<h1 class="nb-title"><span>' + esc(sheet.title) + '</span></h1>' +
+      '<div class="nb-key"><span class="nb-key-t">mon code couleur :</span><span class="fi fi-def">définition</span><span class="fi fi-date">date, chiffre</span><span class="fi fi-ex">exemple</span><span class="fi fi-piege">piège</span><mark class="fi-key">essentiel</mark></div>' +
+      '</div>' +
+      '<div class="nb-body">' + mdToHtml(sheet.content, sheetFigureList(sheet), { fiche: true }) + '</div>' +
+      '</div>';
   }
   // Légende du code couleur, affichée en tête des fiches.
   function ficheLegendHtml() {
@@ -1770,7 +1830,7 @@
         i++;
         while (i < lines.length && !/^\s*:::\s*$/.test(lines[i])) { inner.push(lines[i]); i++; }
         if (/^(frise|timeline)$/i.test(blockOpen[1])) {
-          html += '<div class="fiche-frise">' + inner.filter(function (l) { return l.trim(); }).map(function (l) {
+          html += '<div class="fiche-frise' + (opts.fiche ? " nb-frise" : "") + '">' + inner.filter(function (l) { return l.trim(); }).map(function (l) {
             var t = l.trim().replace(/^[-*]\s+/, "");
             var m = /^(.{1,40}?)\s*[:–—]\s+(.*)$/.exec(t);
             return '<div class="ff-item"><span class="ff-date">' + inlineMdPlain(m ? m[1] : "") + '</span><span class="ff-text">' + inlineMdPlain(m ? m[2] : t) + '</span></div>';
@@ -1884,6 +1944,7 @@
           } else {
             cbody = mdToHtml(quoteLines.slice(1).join("\n"), figures, nestedOpts);
           }
+          if (opts.fiche) { html += nbCalloutHtml(ctype, typed[2], quoteLines.slice(1), figures, nestedOpts); continue; }
           html += '<div class="fc-box fc-' + ctype + (opts.fiche ? " fc-has-dino" : "") + '">' + (opts.fiche ? ficheDinoHtml(FICHE_DINO_FOR[ctype], FICHE_DINO_COLOR[ctype], "fc-dino", 4) : "") + '<div class="fc-head"><span class="fc-icon">' + info.icon + '</span>' +
             (typed[2] && ctype !== "def" ? '<span class="fc-kind">' + info.label + '</span>' : "") + '<span class="fc-title">' + ctitle + '</span></div>' +
             (cbody ? '<div class="fc-body">' + cbody + '</div>' : "") + '</div>';
@@ -1896,6 +1957,14 @@
         var headingMatch = /^(#{1,6})\s*(.*)$/.exec(line.trim());
         var tag = headingMatch[1].length <= 2 ? "h3" : "h4";
         // Fiche : chaque bandeau de section a son dino blanc, une espèce différente à chaque section.
+        if (opts.fiche) {   // fiche « cahier » : titre écrit à la main, numéro entouré et dino autocollant dans la marge
+          var htxt = headingMatch[2].replace(NB_LEAD_EMOJI, "");   // sans l'emoji du début : un élève n'en met pas dans ses titres
+          if (tag === "h3" && !opts.nested) {
+            var n = ++sectionCount, sp = SECTION_DINOS[(n - 1) % SECTION_DINOS.length];
+            html += '<h3 class="nb-h nb-c' + ((n - 1) % 5) + '"><span class="nb-num">' + n + '</span>' + ficheDinoHtml(sp, NB_STICKER_COLORS[(n - 1) % NB_STICKER_COLORS.length], "nb-sticker", 3) + '<span class="nb-ht">' + inlineMdPlain(htxt) + '</span></h3>';
+          } else html += '<' + tag + ' class="nb-h4">' + inlineMdPlain(htxt) + '</' + tag + '>';
+          continue;
+        }
         var secDino = "";
         if (opts.fiche && !opts.nested && tag === "h3") secDino = ficheDinoHtml(SECTION_DINOS[(sectionCount++) % SECTION_DINOS.length], "#ffffff", "sec-dino");
         html += "<" + tag + ">" + (secDino ? '<span class="sec-title">' + inlineMdPlain(headingMatch[2]) + "</span>" + secDino : inlineMdPlain(headingMatch[2])) + "</" + tag + ">";

@@ -417,14 +417,14 @@
     // Retranscription déjà faite page par page : les photos ne sont pas renvoyées (le texte suffit pour
     // l'explication, les flashcards et le contrôle, et ça allège beaucoup l'appel).
     if (pagesText) {
-      return callGemini([{ text: buildCoursePrompt(title, subjectName, chapterName, 0, priorTranscription, null, pagesText, addMode) }], COURSE_SCHEMA);
+      return callGemini([{ text: buildCoursePrompt(title, subjectName, chapterName, 0, priorTranscription, null, pagesText, addMode) }], COURSE_SCHEMA, 65536, 240000);
     }
     var images = (imageDataUrls || []).map(function (url) {
       var m = /^data:(image\/[a-zA-Z+]+|application\/pdf);base64,(.+)$/.exec(url || "");
       return m ? { inline_data: { mime_type: m[1], data: m[2] } } : null;
     }).filter(Boolean);
     var parts = images.concat([{ text: buildCoursePrompt(title, subjectName, chapterName, images.length, priorTranscription, pre) }]);
-    return callGemini(parts, COURSE_SCHEMA);
+    return callGemini(parts, COURSE_SCHEMA, 65536, 240000);   // réponse longue : avec le délai de 60 s, chaque modèle était coupé avant d'avoir fini et la génération tournait en boucle
   }
 
   /* ---------------- Retranscription page par page ----------------
@@ -553,46 +553,48 @@
       return "[SCHÉMA DU COURS figure:" + id + (cap ? " — " + cap : "") + "]";
     }).replace(/!\[[^\]]*\]\((?:data:[^)]+|schema:[^)]+)\)/g, "");
   }
-  /* Mise en page des fiches : l'élève doit VOIR et COMPRENDRE la fiche d'un coup d'œil, pas lire un mur
-     de texte. Ce qui marche pour retenir (conseils de révision et études sur le surlignage) : un code
-     couleur FIXE où chaque couleur a un sens (définition, date, piège, exemple...), toujours le même et
-     rappelé par une légende ; peu de surlignage (sinon plus rien ne ressort) ; des images et des schémas
-     à côté du texte qui en parle ; des blocs courts plutôt que des paragraphes. L'IA écrit ces blocs avec
-     une syntaxe simple que mdToHtml transforme en encadrés colorés, colonnes, frise et quiz. */
+  /* Fiches « cahier » : la fiche doit se lire comme la fiche du meilleur élève de la classe, pas comme un
+     texte généré. Ce qui aide vraiment à retenir : un code couleur FIXE (toujours le même sens, rappelé en
+     haut de la fiche), peu de surlignage (sinon plus rien ne ressort), des visuels à côté du texte qui en
+     parle, des blocs courts, et se tester à la fin. L'IA écrit avec une syntaxe simple que mdToHtml
+     transforme en post-it, fiches bristol, formules encadrées, bulles des dinos, tampon, frise et quiz. */
   var SHEET_LAYOUT_RULES =
-    "MISE EN PAGE — LE PLUS IMPORTANT : l'élève doit COMPRENDRE la fiche d'un coup d'œil, sans avoir à lire de longs textes. La fiche reste complète (aucune information du cours ne disparaît), mais elle est écrite en style « fiche » : phrases courtes (15 mots max), mots-clés, flèches →, listes, tableaux, encadrés colorés. JAMAIS de paragraphe de plus de 2 lignes : découpe-le en puces.\n\n" +
-    "Structure obligatoire :\n" +
-    "1. Commence par un bloc « l'essentiel » : 3 à 5 puces qui donnent l'idée générale du chapitre.\n" +
-    "2. Puis une section par grande notion : « ## » + UN emoji en rapport + titre court (ex. « ## ⚡ La tension électrique »). Sous-parties avec « ### ».\n" +
-    "3. Termine par un bloc « quiz » de 4 à 6 questions pour se tester.\n\n" +
-    "Blocs encadrés colorés (écris-les exactement ainsi : une ligne « > [!type] Titre optionnel », puis le contenu sur des lignes qui commencent aussi par « > ») :\n" +
-    "> [!essentiel]\n> - idée 1\n> - idée 2\n" +
-    "Types disponibles, chacun a TOUJOURS la même couleur et le même sens :\n" +
-    "- [!def] Terme → une définition (bleu). Le titre est le terme défini, le contenu la définition courte.\n" +
-    "- [!formule] → une formule, une règle ou une loi à connaître par cœur (violet), avec la signification de chaque lettre et son unité.\n" +
-    "- [!exemple] → un exemple concret (vert).\n" +
-    "- [!piege] → une erreur fréquente ou une confusion à éviter (rouge).\n" +
-    "- [!methode] → une méthode en étapes numérotées « 1. », « 2. »... (orange).\n" +
-    "- [!retenir] → LA phrase à savoir par cœur de la section (jaune), une seule par section au maximum.\n" +
-    "- [!astuce] → un moyen mnémotechnique (phrase, acronyme, image mentale) quand il en existe un vrai et utile (rose).\n" +
-    "- [!quiz] → uniquement à la fin : une question par ligne au format « > Question ? => Réponse courte ».\n" +
-    "Un bloc peut contenir des puces, du gras, des formules et même un tableau. N'en abuse pas : un bloc doit garder du sens (pas tout le texte en blocs).\n\n" +
-    "Code couleur dans le texte (même logique que les blocs, à utiliser avec PARCIMONIE, sinon plus rien ne ressort) :\n" +
-    "- {{def:terme}} : un terme important défini dans le cours (bleu), à sa première apparition.\n" +
-    "- {{date:1789}} : une date ou un chiffre clé à retenir (orange).\n" +
-    "- {{piege:texte}} : un mot ou une petite précision piège (rouge).\n" +
-    "- {{ex:texte}} : un exemple glissé dans une phrase (vert).\n" +
-    "- ==texte== : surligné jaune, LA notion centrale d'une section (1 ou 2 par section, quelques mots, jamais une phrase entière).\n" +
-    "- **gras** : les autres mots importants.\n" +
-    "Pas plus d'un mot sur dix en couleur ou en gras.\n\n" +
-    "Disposition (pour que ça ne soit pas qu'une colonne de texte) :\n" +
-    "- Mets côte à côte ce qui va ensemble — deux notions à comparer, une définition et son exemple, un schéma ou une image et son explication — avec un bloc colonnes : une ligne « :::cols », le contenu de la 1re colonne, une ligne « +++ », la 2e colonne (3 colonnes max), puis une ligne « ::: » pour fermer. Chaque colonne peut contenir des blocs [!...], des listes, une image.\n" +
-    "- Comparaison de plusieurs éléments selon les mêmes critères → un tableau.\n" +
-    "- Suite de dates ou d'étapes dans le temps (histoire, évolution, chronologie) → une frise : une ligne « :::frise », puis une ligne par événement « date : événement », puis « ::: ».\n\n" +
+    "LE TON — LE PLUS IMPORTANT : écris cette fiche comme le meilleur élève de la classe l'écrirait dans son cahier pour réviser, PAS comme une IA. Concrètement :\n" +
+    "- Phrases courtes et directes (15 mots max), mots-clés, flèches → et ⇒ pour les causes et conséquences, ≠ pour opposer, « ex : » pour un exemple. Jamais de paragraphe de plus de 2 lignes : découpe en lignes courtes.\n" +
+    "- Aucun emoji, nulle part (ni dans les titres, ni dans le texte).\n" +
+    "- Interdit : les formules creuses et le ton de présentation (« Plongeons dans… », « Il est important de noter que… », « crucial », « fondamental », « En résumé », « Voici… », « Dans cette fiche… », « N'oublie pas que… » en boucle). Va droit à l'information, comme une vraie fiche.\n" +
+    "- Les titres de parties sont courts et parlants, comme un élève les écrirait (« La crise de l'Ancien Régime », « Calculer une vitesse »), sans numéro (il est ajouté automatiquement).\n" +
+    "- Varie la présentation d'une partie à l'autre (lignes simples, liste, tableau, frise, colonnes, encadrés) : deux parties de suite ne doivent pas avoir exactement la même forme. Tout ne doit pas être dans des encadrés.\n\n" +
+    "COMPLET : la fiche contient TOUT le cours (chaque définition, chaque date, chaque formule, chaque notion, chaque exemple important). Court dans la forme, complet sur le fond.\n\n" +
+    "Structure :\n" +
+    "1. Commence par « > [!essentiel] » : 3 à 5 lignes « - … » qui disent l'idée générale du chapitre (il s'affiche sur un post-it « Si tu ne retiens que ça »).\n" +
+    "2. Puis une partie par grande notion : « ## Titre ». Sous-parties avec « ### Titre ».\n" +
+    "3. Termine par « > [!quiz] » : 5 à 8 questions qui couvrent les points les plus importants, une par ligne au format « > Question ? => Réponse courte ».\n\n" +
+    "Encadrés (une ligne « > [!type] Titre optionnel », puis le contenu sur des lignes qui commencent aussi par « > ») :\n" +
+    "- [!def] Terme → une définition, écrite sur une petite fiche bristol : le titre est le terme, le contenu la définition courte. Une par terme important du cours.\n" +
+    "- [!formule] Nom → une formule, une règle ou une loi à savoir par cœur (encadrée au stylo), avec ce que veut dire chaque lettre et son unité.\n" +
+    "- [!exemple] Titre → un exemple concret, à l'encre verte.\n" +
+    "- [!piege] → une erreur fréquente ou une confusion à éviter : c'est le petit dino qui le dit dans une bulle, donc écris-le comme une mise en garde directe et courte (« Ne confonds pas X et Y : … »).\n" +
+    "- [!astuce] → un vrai moyen mnémotechnique (phrase, acronyme, image mentale), soufflé par le bébé dino. Seulement s'il en existe un vraiment utile.\n" +
+    "- [!methode] Titre → une méthode en étapes « 1. », « 2. »…\n" +
+    "- [!retenir] → LA phrase à savoir par cœur d'une partie (coup de tampon « À retenir »), une seule par partie au maximum.\n" +
+    "- [!quiz] → uniquement à la fin (voir plus haut).\n" +
+    "Un encadré peut contenir des puces, du gras, des formules et même un tableau.\n\n" +
+    "Code couleur dans le texte (avec PARCIMONIE : pas plus d'un mot sur dix en couleur ou en gras, sinon plus rien ne ressort) :\n" +
+    "- {{def:terme}} : un terme important (surligneur bleu), à sa première apparition.\n" +
+    "- {{date:1789}} : une date ou un chiffre clé (entouré en orange).\n" +
+    "- {{piege:texte}} : un mot ou une précision piège (souligné en rouge).\n" +
+    "- {{ex:texte}} : un exemple glissé dans une phrase (encre verte).\n" +
+    "- ==texte== : surligneur jaune, LA notion centrale d'une partie (quelques mots, jamais une phrase entière, 1 ou 2 par partie).\n" +
+    "- **gras** : les autres mots importants.\n\n" +
+    "Disposition :\n" +
+    "- Côte à côte ce qui va ensemble (deux notions à comparer, une définition et son exemple, une image et son explication) : une ligne « :::cols », la 1re colonne, une ligne « +++ », la 2e colonne (3 colonnes max), puis une ligne « ::: ».\n" +
+    "- Plusieurs éléments comparés selon les mêmes critères → un tableau.\n" +
+    "- Une suite de dates ou d'étapes dans le temps → une frise : une ligne « :::frise », puis une ligne par événement « date : événement », puis « ::: ».\n\n" +
     "Visuels (une fiche sans visuel est beaucoup plus dure à retenir) :\n" +
-    "- Schémas dessinés : mets-en dès qu'un processus, un cycle, une classification, une cause → conséquence ou des relations entre notions peuvent être montrés (1 à 4 schémas, voir \"schemas\").\n" +
+    "- Schémas dessinés : dès qu'un processus, un cycle, une classification, une cause → conséquence ou des relations entre notions peuvent être montrés (1 à 4 schémas, voir \"schemas\").\n" +
     "- Schémas du cours : le contenu source contient des repères « [SCHÉMA DU COURS figure:ID — légende] ». Quand un de ces schémas aide à comprendre une notion de la fiche, remets-le en écrivant, seul sur sa ligne : ![légende courte](figure:ID) (avec l'ID exact). Ne mets jamais un ID qui n'est pas dans la source.\n" +
-    "- Images de Wikipédia : pour les éléments concrets (personnage, œuvre, lieu, organe, objet...), voir \"images\".\n\n";
+    "- Photos de Wikipédia (collées comme des polaroïds) : pour les éléments concrets (personnage, œuvre, lieu, organe, animal, objet…), 1 à 3 par fiche quand le cours en parle, voir \"images\".\n\n";
   function buildRevisionSheetPrompt(title, subjectName, chapterName, scope, courses) {
     var sourceBlocks = courses.map(function (co) {
       return "### Cours : " + co.title + "\n" + sheetSourceText(co);
@@ -921,7 +923,7 @@
             genEnd(sheet.id, true);
             sheet.content = finalContent;
             sheet.schemas = schemas;
-            sheet.format = 2;
+            sheet.format = 3;
             sheet.status = "ready";
             saveDB();
             toast("Fiche générée · " + sheet.title);

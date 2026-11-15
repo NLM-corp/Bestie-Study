@@ -1554,3 +1554,192 @@ mark.fi-key { background: linear-gradient(transparent 38%, var(--c-mark) 38%, va
 /* les œufs épiques et légendaires ont des étincelles / un halo autour : image plus grande pour un œuf de même taille */
 .dp-egg-box-egg-epique { width: 66%; bottom: 24%; }
 .dp-egg-box-egg-legendaire { width: 66%; bottom: 21%; }
+
+/* ---------- Fiches de révision « cahier » ----------
+   Une page du cahier d'un bon élève : petits carreaux, marge rouge, titres à la main, surligneurs,
+   fiches bristol, post-it, tampon, polaroïds, et les dinos dans la marge. Toujours sur papier clair
+   (même en mode sombre : c'est une feuille). Toutes les tailles sont en em : à l'impression, un seul
+   réglage (la taille du texte de .nb) agrandit ou réduit tout pareil. */
+.nb {
+  --ink: #23304d; --ink-2: #4a5878; --pen-red: #c8352b; --pen-green: #2e7d4f; --pen-violet: #5b3fb0; --pen-orange: #c96a12;
+  --fluo-y: rgba(255, 228, 40, 0.62); --fluo-b: rgba(96, 196, 255, 0.45); --fluo-o: rgba(255, 166, 64, 0.5); --fluo-g: rgba(130, 220, 110, 0.5); --fluo-p: rgba(255, 120, 170, 0.42);
+  --grid: rgba(70, 120, 200, 0.13); --margin-x: 3.6em;
+  position: relative; font-family: "Patrick Hand", "Comic Sans MS", system-ui, sans-serif; font-size: 17px; line-height: 1.55; color: var(--ink);
+  background-color: #fffdf6;
+  background-image: linear-gradient(90deg, transparent calc(var(--margin-x) - 0.55em), rgba(220, 70, 70, 0.55) calc(var(--margin-x) - 0.55em), rgba(220, 70, 70, 0.55) calc(var(--margin-x) - 0.45em), transparent calc(var(--margin-x) - 0.45em)),
+    linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 100% 100%, 1.3em 1.3em, 1.3em 1.3em;
+  padding: 1.6em 1.4em 2em var(--margin-x);
+  border-radius: 6px; box-shadow: 0 1px 0 #e9e2cf, 0 10px 30px rgba(60, 40, 10, 0.12);
+  overflow-wrap: break-word; word-break: break-word;
+}
+.nb-screen { max-width: 860px; margin: 0 auto; }
+.nb p, .nb ul, .nb ol, .nb li { max-width: none; color: var(--ink); }
+.nb p { margin: 0 0 0.55em; }
+.nb strong { color: #111a33; font-weight: 700; }
+.nb ul { list-style: none; padding-left: 1.2em; margin: 0.2em 0 0.7em; }
+.nb ul > li { position: relative; margin-bottom: 0.25em; }
+.nb ul > li::before { content: "→"; position: absolute; left: -1.15em; color: var(--ink-2); font-weight: 700; }
+.nb ol { padding-left: 1.6em; margin: 0.2em 0 0.7em; }
+.nb ol > li { margin-bottom: 0.3em; }
+.nb ol > li::marker { font-family: "Caveat", cursive; font-weight: 700; font-size: 1.25em; color: var(--pen-orange); }
+
+/* en-tête : matière, titre écrit au feutre avec un coup de surligneur, mon code couleur */
+.nb-head { position: relative; margin: 0 0 1.4em; padding-right: 4.5em; }
+.nb-head-dino { position: absolute; right: 0; top: -0.3em; width: 3.4em; height: auto; transform: rotate(6deg); filter: drop-shadow(0 0 0 #fff) drop-shadow(2px 2px 0 #fff) drop-shadow(-2px -2px 0 #fff) drop-shadow(1px 3px 3px rgba(0,0,0,0.25)); }
+.nb-head-sub { font-family: "Caveat", cursive; font-size: 1.25em; color: var(--ink-2); }
+.nb-title { font-family: "Caveat", cursive; font-weight: 700; font-size: 2.6em; line-height: 1.05; margin: 0.05em 0 0.25em; color: #15203d; letter-spacing: 0; }
+.nb-title span { background: linear-gradient(100deg, transparent 0.4%, var(--fluo-y) 1.2%, var(--fluo-y) 97%, transparent 99%) 0 72% / 100% 42% no-repeat; padding: 0 0.15em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.nb-key { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25em 0.7em; font-size: 0.92em; }
+.nb-key-t { font-family: "Caveat", cursive; font-size: 1.3em; color: var(--ink-2); }
+
+/* code couleur dans le texte : surligneurs, date entourée, piège souligné en vagues */
+.nb .fi, .nb .fi-key { font: inherit; border-radius: 0; padding: 0 0.12em; box-decoration-break: clone; -webkit-box-decoration-break: clone; color: inherit; font-weight: 700; }
+.nb .fi-def { background: linear-gradient(100deg, transparent 1%, var(--fluo-b) 3%, var(--fluo-b) 97%, transparent 99%) 0 80% / 100% 55% no-repeat; }
+.nb .fi-key { background: linear-gradient(100deg, transparent 1%, var(--fluo-y) 3%, var(--fluo-y) 97%, transparent 99%) 0 85% / 100% 70% no-repeat; }
+.nb .fi-ex { background: none; color: var(--pen-green); font-weight: 700; }
+.nb .fi-piege { background: none; color: var(--pen-red); text-decoration: underline wavy var(--pen-red); text-underline-offset: 0.18em; text-decoration-thickness: 1.5px; }
+.nb .fi-date { background: none; color: var(--pen-orange); border: 2px solid var(--pen-orange); border-radius: 50% 45% 55% 48% / 60% 50% 50% 45%; padding: 0 0.3em; white-space: nowrap; }
+
+/* parties : titre au feutre souligné d'un trait, numéro entouré et dino autocollant dans la marge */
+.nb h3.nb-h { position: relative; font-family: "Caveat", cursive; font-weight: 700; font-size: 2em; line-height: 1.1; color: #15203d; margin: 1.3em 0 0.5em; padding: 0 0 0.1em; display: block; background: none; border: none; box-shadow: none; }
+.nb h3.nb-h:first-child { margin-top: 0.4em; }
+.nb h3.nb-h::before, .nb h3.nb-h::after { content: none; }
+.nb-ht { background: linear-gradient(var(--sec, var(--fluo-g)), var(--sec, var(--fluo-g))) 0 100% / 100% 0.28em no-repeat; padding-bottom: 0.05em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.nb-c0 { --sec: var(--fluo-g); } .nb-c1 { --sec: var(--fluo-b); } .nb-c2 { --sec: var(--fluo-o); } .nb-c3 { --sec: var(--fluo-p); } .nb-c4 { --sec: var(--fluo-y); }
+.nb-num { position: absolute; left: -2em; top: 0.12em; width: 1.25em; height: 1.25em; display: flex; align-items: center; justify-content: center; font-size: 0.8em; color: var(--pen-red); border: 2px solid var(--pen-red); border-radius: 48% 52% 45% 55% / 55% 45% 55% 45%; transform: rotate(-6deg); }
+.nb-sticker { position: absolute; left: -1.62em; top: 1.3em; width: 1.5em !important; height: auto !important; transform: rotate(-8deg); filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff) drop-shadow(1px 2px 2px rgba(0,0,0,0.22)); }
+.nb h4.nb-h4, .nb h5.nb-h4, .nb h6.nb-h4 { font-family: "Caveat", cursive; font-weight: 700; font-size: 1.45em; color: #1d2a4a; margin: 0.9em 0 0.25em; padding: 0; border: none; text-decoration: underline; text-decoration-color: rgba(35, 48, 77, 0.45); text-underline-offset: 0.15em; text-decoration-thickness: 1.5px; }
+
+/* l'essentiel : post-it jaune scotché */
+.nb-postit { position: relative; background: #fff27a; margin: 0.6em 0.3em 1.3em; padding: 1.1em 1.2em 0.8em; transform: rotate(var(--tilt, -1deg)); box-shadow: 0 0.6em 1em -0.5em rgba(80, 60, 0, 0.45), inset 0 -0.5em 1.2em -1em rgba(120, 90, 0, 0.35); max-width: 40em; }
+.nb-postit::before { content: ""; position: absolute; top: -0.65em; left: 50%; width: 6em; height: 1.4em; margin-left: -3em; background: rgba(255, 255, 255, 0.55); border: 1px solid rgba(0, 0, 0, 0.06); transform: rotate(-3deg); box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+.nb-postit-t { font-family: "Caveat", cursive; font-weight: 700; font-size: 1.5em; color: #6b4b00; margin-bottom: 0.15em; }
+
+/* définition : petite fiche bristol (ligne rouge sous le mot, lignes bleues) */
+.nb-bristol { background: #fff; background-image: linear-gradient(rgba(70, 120, 200, 0.22) 1px, transparent 1px); background-size: 100% 1.55em; background-position: 0 2.62em; border: 1px solid #e3e3e3; border-radius: 3px; margin: 0.7em 0 1em; padding: 0.35em 1em 0.6em; transform: rotate(var(--tilt, 0deg)); box-shadow: 0 2px 0 #ececec, 0 0.5em 0.9em -0.5em rgba(0, 0, 0, 0.3); max-width: 38em; }
+.nb-bristol-t { font-family: "Caveat", cursive; font-weight: 700; font-size: 1.45em; color: #1a3f8f; border-bottom: 2px solid rgba(220, 70, 70, 0.7); margin: 0 -0.69em 0.3em; padding: 0 0.69em 0.05em; }
+.nb-bristol-b p { margin: 0 0 0.2em; line-height: 1.55em; }
+
+/* formule : encadré au stylo, à savoir par cœur */
+.nb-formule { position: relative; margin: 1.1em 0.4em 1em; padding: 0.8em 1.1em 0.7em; border: 2.5px solid var(--pen-violet); border-radius: 1.2em 0.3em 1em 0.35em / 0.35em 1em 0.3em 1.2em; box-shadow: 0.25em 0.25em 0 -0.05em rgba(91, 63, 176, 0.25); text-align: center; max-width: 36em; }
+.nb-formule-tag { position: absolute; top: -0.95em; right: 1em; font-family: "Caveat", cursive; font-weight: 700; font-size: 1.25em; color: var(--pen-red); background: #fffdf6; padding: 0 0.3em; transform: rotate(4deg); }
+.nb-formule-t { font-family: "Caveat", cursive; font-weight: 700; font-size: 1.4em; color: var(--pen-violet); margin-bottom: 0.2em; }
+.nb-formule ol, .nb-formule ul { display: inline-block; text-align: left; margin-bottom: 0; }
+.nb-formule > :last-child, .nb-bristol-b > :last-child, .nb-bubble > :last-child, .nb-postit > :last-child, .nb-ex > :last-child { margin-bottom: 0; }
+.nb-formule .math-chip { font-size: 1.15em; }
+
+/* exemple : à l'encre verte, accolade dans la marge du bloc */
+.nb-ex { position: relative; margin: 0.6em 0 0.9em; padding: 0.1em 0 0.1em 1em; border-left: 2.5px solid var(--pen-green); border-radius: 0.8em 0 0 0.8em; color: var(--pen-green); }
+.nb-ex p, .nb-ex li { color: #24553a; }
+.nb-ex-tag { font-family: "Caveat", cursive; font-weight: 700; font-size: 1.35em; color: var(--pen-green); margin-right: 0.3em; float: left; line-height: 1.1; }
+.nb-ex-t { font-weight: 700; color: var(--pen-green); }
+
+/* méthode : étapes numérotées entourées, en orange */
+.nb-methode { margin: 0.8em 0 1em; padding: 0.4em 0.8em 0.5em; border: 2px dashed rgba(201, 106, 18, 0.6); border-radius: 0.6em; background: rgba(255, 166, 64, 0.08); }
+.nb-methode-t { font-family: "Caveat", cursive; font-weight: 700; font-size: 1.45em; color: var(--pen-orange); }
+.nb-methode ol { counter-reset: nbstep; list-style: none; padding-left: 2em; }
+.nb-methode ol > li { counter-increment: nbstep; position: relative; }
+.nb-methode ol > li::before { content: counter(nbstep); position: absolute; left: -1.9em; top: -0.05em; width: 1.35em; height: 1.35em; display: flex; align-items: center; justify-content: center; font-family: "Caveat", cursive; font-weight: 700; color: #fff; background: var(--pen-orange); border-radius: 50% 45% 55% 48%; }
+
+/* à retenir : surligné, avec un coup de tampon */
+.nb-retenir { position: relative; margin: 1.1em 0 1.1em; padding: 0.55em 0.8em 0.45em 0.8em; background: linear-gradient(100deg, transparent 0.5%, var(--fluo-y) 1.5%, var(--fluo-y) 98%, transparent 99.5%); font-size: 1.06em; }
+.nb-retenir-b p { margin: 0; }
+.nb-stamp { position: absolute; top: -0.9em; right: 0.6em; font-family: "Public Sans", Arial, sans-serif; font-weight: 800; font-size: 0.72em; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(200, 40, 40, 0.88); border: 2.5px solid rgba(200, 40, 40, 0.88); border-radius: 0.3em; padding: 0.1em 0.5em; transform: rotate(var(--tilt, -4deg)); background: rgba(255, 253, 246, 0.6); }
+
+/* le dino qui parle (piège, astuce) : dans une bulle */
+.nb-talk { display: flex; align-items: flex-end; gap: 0.9em; margin: 1em 0 1.1em; }
+.nb-talk-dino { flex: none; width: 3.2em !important; height: auto !important; transform: scaleX(-1); filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff); }
+.nb-bubble { position: relative; flex: 1; min-width: 0; background: #fff; border: 2.5px solid var(--bub, var(--pen-red)); border-radius: 1.2em 1.1em 1.3em 0.9em / 1em 1.2em 1em 1.1em; padding: 0.5em 0.9em 0.55em; max-width: 36em; }
+.nb-bubble::before, .nb-bubble::after { content: ""; position: absolute; width: 0; height: 0; border-style: solid; }
+.nb-bubble::before { left: -0.85em; bottom: 0.75em; border-width: 0.5em 0.85em 0.5em 0; border-color: transparent var(--bub, var(--pen-red)) transparent transparent; }
+.nb-bubble::after { left: -0.5em; bottom: calc(0.75em + 0.2em); border-width: 0.3em 0.52em 0.3em 0; border-color: transparent var(--bub-bg, #fff) transparent transparent; }
+.nb-bubble p { margin: 0 0 0.2em; }
+.nb-bubble-t { font-family: "Caveat", cursive; font-weight: 700; font-size: 1.4em; line-height: 1.1; color: var(--bub, var(--pen-red)); }
+.nb-talk-astuce { --bub: #c2407a; }
+.nb-talk-astuce { --bub-bg: #fff5fa; }
+.nb-talk-astuce .nb-bubble { border-style: dashed; background: #fff5fa; }
+
+/* frise : un trait au stylo, les dates en orange */
+.nb .nb-frise { padding-left: 1.6em; margin: 0.6em 0 1em; }
+.nb .nb-frise::before { left: 0.45em; width: 2.5px; background: var(--ink); opacity: 0.7; border-radius: 2px; }
+.nb .nb-frise .ff-item { position: relative; display: flex; flex-wrap: wrap; gap: 0 0.6em; align-items: baseline; margin: 0 0 0.35em; }
+.nb .nb-frise .ff-item::before { content: ""; position: absolute; left: -1.37em; top: 0.45em; width: 0.6em; height: 0.6em; border-radius: 50%; background: #fffdf6; border: 2.5px solid var(--pen-orange); }
+.nb .nb-frise .ff-date { background: none; padding: 0; border: none; font-family: "Caveat", cursive; font-weight: 700; font-size: 1.3em; color: var(--pen-orange); white-space: nowrap; }
+.nb .nb-frise .ff-text { color: var(--ink); }
+
+/* tableaux : tracés au stylo, en-tête surligné */
+.nb table { border-collapse: collapse; margin: 0.6em 0 1em; background: rgba(255, 255, 255, 0.55); font-size: 0.95em; }
+.nb th, .nb td { border: 1.5px solid rgba(35, 48, 77, 0.7); padding: 0.3em 0.6em; text-align: left; vertical-align: top; color: var(--ink); }
+.nb th { font-family: "Caveat", cursive; font-size: 1.3em; font-weight: 700; background: linear-gradient(100deg, transparent 2%, var(--fluo-g) 4%, var(--fluo-g) 96%, transparent 98%) 0 70% / 100% 60% no-repeat; }
+
+/* photos collées comme des polaroïds, schémas avec leur légende à la main */
+.nb .prose-figure { margin: 0.9em auto 1.1em; text-align: center; }
+.nb .prose-figure img { max-height: 280px; border-radius: 0; }
+.nb .prose-photo { display: table; position: relative; background: #fff; padding: 0.55em 0.55em 0.3em; box-shadow: 0 0.5em 1em -0.4em rgba(0, 0, 0, 0.35); transform: rotate(-1.6deg); }
+.nb .prose-photo::before { content: ""; position: absolute; top: -0.6em; left: 50%; width: 4.5em; height: 1.2em; margin-left: -2.25em; background: rgba(255, 240, 180, 0.7); transform: rotate(2deg); }
+.nb .prose-photo img { box-shadow: none; display: block; }
+.nb .prose-figure figcaption { font-family: "Caveat", cursive; font-size: 1.25em; color: var(--ink-2); font-style: normal; margin-top: 0.15em; }
+.nb .prose-schema svg { max-width: 100%; max-height: 340px; background: #fff; border-radius: 0.4em; box-shadow: 0 0.3em 0.8em -0.4em rgba(0,0,0,0.3); }
+.nb .fiche-cols { gap: 1.2em; }
+
+/* quiz : feuille pliée, réponses cachées de l'autre côté des pointillés */
+.nb-quiz { margin: 1.8em 0 0.4em; padding-top: 0.6em; border-top: 2px dashed rgba(35, 48, 77, 0.35); }
+.nb-quiz-t { font-family: "Caveat", cursive; font-weight: 700; font-size: 1.9em; color: #15203d; margin-bottom: 0.3em; }
+.nb-quiz-t small { font-size: 0.55em; font-weight: 500; color: var(--ink-2); }
+.nb-q { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); border-bottom: 1px solid rgba(70, 120, 200, 0.18); cursor: pointer; }
+.nb-q-q { padding: 0.35em 0.8em 0.35em 0; }
+.nb-q-n { display: inline-block; min-width: 1.4em; font-family: "Caveat", cursive; font-weight: 700; font-size: 1.2em; color: var(--pen-red); }
+.nb-q-a { position: relative; padding: 0.35em 0 0.35em 0.9em; border-left: 2px dashed rgba(35, 48, 77, 0.4); color: var(--pen-green); }
+.nb-q-a span { visibility: hidden; }
+.nb-q-a::after { content: "touche pour voir"; position: absolute; left: 0.9em; top: 50%; transform: translateY(-50%); font-family: "Caveat", cursive; font-size: 1.15em; color: var(--ink-2); opacity: 0.8; }
+.nb-q.open .nb-q-a span { visibility: visible; }
+.nb-q.open .nb-q-a::after { content: none; }
+
+@media (max-width: 640px) {
+  .nb { --margin-x: 2.3em; font-size: 16px; padding-right: 0.8em; }
+  .nb-sticker { display: none; }
+  .nb-num { left: -1.35em; }
+  .nb-title { font-size: 2.1em; }
+  .nb-talk-dino { width: 2.4em !important; }
+}
+
+/* impression : la même feuille, la taille vient de .print-nb .nb (réglage 60 à 300 %) */
+@media print {
+  .print-nb .nb { box-shadow: none; border-radius: 0; padding: 0.4em 0.4em 1em var(--margin-x); --grid: rgba(70, 120, 200, 0.1); }
+  .print-nb .nb, .print-nb .nb * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .nb-postit, .nb-bristol, .nb-formule, .nb-talk, .nb-retenir, .nb-methode, .nb .prose-figure, .nb table, .nb .nb-frise, .nb .fiche-cols, .nb-ex, .nb tr, .nb-q, .nb .ff-item { break-inside: avoid; page-break-inside: avoid; }
+  .nb h3.nb-h, .nb .nb-h4 { break-after: avoid; page-break-after: avoid; }
+  .nb-q-a span { visibility: visible; display: inline-block; transform: rotate(180deg); }   /* sur papier : réponses écrites à l'envers */
+  .nb-q-a::after { content: none; }
+}
+.nb { line-height: 1.42; padding: 1.1em 1em 1.2em var(--margin-x); }
+.nb p { margin: 0 0 0.35em; }
+.nb ul, .nb ol { margin: 0.1em 0 0.45em; }
+.nb ul > li, .nb ol > li { margin-bottom: 0.1em; }
+.nb-head { margin: 0 0 0.8em; }
+.nb-title { font-size: 2.3em; margin: 0 0 0.15em; }
+.nb h3.nb-h { font-size: 1.8em; margin: 0.8em 0 0.25em; }
+.nb h4.nb-h4, .nb h5.nb-h4, .nb h6.nb-h4 { font-size: 1.35em; margin: 0.5em 0 0.1em; }
+.nb-postit { margin: 0.4em 0.2em 0.8em; padding: 0.75em 1em 0.55em; }
+.nb-bristol { margin: 0.4em 0 0.55em; padding: 0.25em 0.9em 0.35em; }
+.nb-formule { margin: 0.75em 0.3em 0.55em; padding: 0.45em 0.9em 0.4em; }
+.nb-formule ol, .nb-formule ul, .nb-formule p { margin: 0; }
+.nb-ex { margin: 0.35em 0 0.5em; }
+.nb-methode { margin: 0.5em 0 0.6em; padding: 0.3em 0.7em 0.35em; }
+.nb-retenir { margin: 0.8em 0 0.6em; padding: 0.4em 0.7em 0.35em; }
+.nb-talk { margin: 0.5em 0 0.6em; }
+.nb-bubble { padding: 0.35em 0.8em 0.4em; }
+.nb .nb-frise { margin: 0.3em 0 0.6em; }
+.nb .nb-frise .ff-item { margin: 0 0 0.12em; }
+.nb table { margin: 0.35em 0 0.55em; }
+.nb th, .nb td { padding: 0.2em 0.5em; }
+.nb .prose-figure { margin: 0.5em auto 0.7em; }
+.nb-quiz { margin: 1em 0 0.2em; padding-top: 0.4em; }
+.nb-q-q, .nb-q-a { padding-top: 0.2em; padding-bottom: 0.2em; }
+.nb .nb-frise .ff-item { padding: 0; min-height: 0; line-height: 1.3; }
+.nb-ex-tag { float: none; display: inline; }
+.nb-ex-t { display: inline; }
+.nb-postit { margin: 0.7em 0.3em 1.2em; }
+.nb-bristol { margin: 0.75em 0 0.95em; }
+.nb .prose-photo { margin: 1em auto 1.1em; }

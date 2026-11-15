@@ -927,16 +927,9 @@
     return { hueStyle: hueStyle, scaleStyle: scaleStyle };
   }
   function buildRevisionSheetPrintHtml(sheet, subjectName, chapterName) {
-    var fs = ficheHueAndScaleStyle();
-    return fs.scaleStyle + '<div class="print-doc print-doc-fiche" ' + fs.hueStyle + '>' +
-      '<div class="print-fiche-header">' +
-      '<div class="print-fiche-eyebrow">' + esc(subjectName) + (chapterName ? ' · ' + esc(chapterName) : "") + '</div>' +
-      '<h1>' + esc(sheet.title) + '</h1>' +
-      '<div class="print-fiche-sub">Fiche de révision' + (sheet.scope === "theme" ? " — thème complet" : sheet.scope === "course" ? "" : " — chapitre complet") + '</div>' +
-      '</div>' +
-      (sheet.format === 2 ? ficheLegendHtml() : "") +
-      '<div class="print-fiche-body fiche">' + mdToHtml(sheet.content, sheetFigureList(sheet), { fiche: true }) + '</div>' +
-      '</div>';
+    // Fiche « cahier » : toutes ses tailles sont relatives à celle du texte, donc un seul réglage suffit.
+    var scaleStyle = '<style>.print-nb .nb{font-size:' + (13.5 * getPrintScale()).toFixed(2) + 'px}</style>';
+    return scaleStyle + '<div class="print-doc print-nb">' + nbSheetHtml(sheet, subjectName, chapterName) + '</div>';
   }
   function buildCoursePrintHtml(course, subjectName, chapterName, includeExplanation) {
     var fs = ficheHueAndScaleStyle();

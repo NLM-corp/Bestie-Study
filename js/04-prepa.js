@@ -861,7 +861,7 @@
       return m ? { inline_data: { mime_type: m[1], data: m[2] } } : null;
     }).filter(Boolean);
     var parts = images.concat([{ text: buildImportedExercisePrompt(images.length, pre) }]);
-    return callGemini(parts, IMPORTED_EXERCISE_SCHEMA);
+    return callGemini(parts, IMPORTED_EXERCISE_SCHEMA, 32768, 180000);
   }
   function geminiImageParts(dataUrls) {
     return (dataUrls || []).map(function (url) {

@@ -738,7 +738,7 @@
   function generateMethodologyContent(imageDataUrls, title) {
     var images = geminiImageParts(imageDataUrls);
     var parts = images.concat([{ text: buildMethodologyPrompt(title, images.length) }]);
-    return callGemini(parts, METHODOLOGY_SCHEMA);
+    return callGemini(parts, METHODOLOGY_SCHEMA, 32768, 180000);
   }
   function runMethodologyGeneration(methodo) {
     methodo.status = "processing";
