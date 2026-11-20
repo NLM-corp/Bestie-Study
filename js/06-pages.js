@@ -97,6 +97,9 @@
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   }
+  function escAi(s) {
+    return esc(s).replace(/&lt;(\/?)(u|b|i|em|strong|sup|sub|mark|s|br)\s*\/?&gt;/gi, function (m, close, tag) { tag = tag.toLowerCase(); return tag === "br" ? "<br>" : "<" + close + tag + ">"; });
+  }
 
   function renderShell(parts, contentHtml, opts) {
     opts = opts || {};
@@ -2002,7 +2005,7 @@
     // lignes — on le protège avant l'échappement HTML pour qu'il reste un vrai saut de ligne
     // au lieu de s'afficher tel quel comme du texte brut "<br>".
     s = String(s == null ? "" : s).replace(/<br\s*\/?>/gi, "");
-    s = esc(s);
+    s = escAi(s);
     s = s.replace(//g, "<br>");
     s = s.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
     // Italique *texte* (après le gras) : l'étoile doit être collée au texte des deux côtés, pour ne pas

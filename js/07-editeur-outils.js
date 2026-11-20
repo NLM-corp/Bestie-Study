@@ -1018,8 +1018,8 @@
       '<div class="fc-hint">Clique sur la carte pour la retourner</div>' +
       '<div class="flip-card' + (st.flipped ? " flipped" : "") + '" onclick="App.flipCard(\'' + course.id + '\')">' +
       '<div class="flip-inner">' +
-      '<div class="flip-face"><span class="flip-eyebrow">Question</span><span class="flip-text">' + esc(card.q) + '</span></div>' +
-      '<div class="flip-face flip-face-back"><span class="flip-eyebrow">Réponse</span><span class="flip-text">' + esc(card.a) + '</span></div>' +
+      '<div class="flip-face"><span class="flip-eyebrow">Question</span><span class="flip-text">' + escAi(card.q) + '</span></div>' +
+      '<div class="flip-face flip-face-back"><span class="flip-eyebrow">Réponse</span><span class="flip-text">' + escAi(card.a) + '</span></div>' +
       '</div></div>' +
       '<div class="fc-controls">' +
       '<button class="btn btn-ghost" onclick="App.markCard(\'' + course.id + '\',\'review\')">À revoir</button>' +
@@ -1042,8 +1042,8 @@
       '<div class="fc-hint">Une carte par erreur détectée ce jour-là — clique pour la retourner</div>' +
       '<div class="flip-card' + (st.flipped ? " flipped" : "") + '" onclick="App.epFlipCard(\'' + key + '\')">' +
       '<div class="flip-inner">' +
-      '<div class="flip-face"><span class="flip-eyebrow">Question</span><span class="flip-text">' + esc(card.q) + '</span></div>' +
-      '<div class="flip-face flip-face-back"><span class="flip-eyebrow">Réponse</span><span class="flip-text">' + esc(card.a) + '</span></div>' +
+      '<div class="flip-face"><span class="flip-eyebrow">Question</span><span class="flip-text">' + escAi(card.q) + '</span></div>' +
+      '<div class="flip-face flip-face-back"><span class="flip-eyebrow">Réponse</span><span class="flip-text">' + escAi(card.a) + '</span></div>' +
       '</div></div>' +
       '<div class="fc-controls">' +
       '<button class="btn btn-ghost" onclick="App.epMarkCard(\'' + key + '\',\'review\')">À revoir</button>' +
@@ -1076,7 +1076,7 @@
     return '<div class="exercise-layout"><div class="quiz-wrap">' +
       '<div class="quiz-progress-dots">' + dots + '</div>' +
       '<div class="quiz-q-num">Question ' + (st.idx + 1) + ' / ' + questions.length + '</div>' +
-      '<div class="quiz-q-text">' + esc(q.prompt) + '</div>' + exerciseFigureHtml(q) +
+      '<div class="quiz-q-text">' + escAi(q.prompt) + '</div>' + exerciseFigureHtml(q) +
       choices +
       '<div class="quiz-nav">' +
       '<button class="btn btn-ghost" ' + (st.idx === 0 ? "disabled" : "") + ' onclick="App.quizNav(\'' + course.id + '\',-1)">← Précédente</button>' +
@@ -1095,7 +1095,7 @@
     var items = questions.map(function (q, i) {
       var ok = st.answers[i] === q.correctIndex;
       return '<div class="correction-item ' + (ok ? "correct" : "wrong") + '">' +
-        '<div class="correction-q">' + esc(q.prompt) + '</div>' + exerciseFigureHtml(q) +
+        '<div class="correction-q">' + escAi(q.prompt) + '</div>' + exerciseFigureHtml(q) +
         '<div class="correction-ans ' + (ok ? "good" : "bad") + '">Ta réponse : ' + esc(q.choices[st.answers[i]]) + '</div>' +
         (ok ? '' : '<div class="correction-ans good">Bonne réponse : ' + esc(q.choices[q.correctIndex]) + '</div>') +
         '<div class="correction-exp">' + mdToHtml(q.explanation) + '</div>' +

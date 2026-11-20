@@ -1257,7 +1257,7 @@
         var level = h.level || (h.wasCorrect ? "correct" : "wrong");
         var cls = gradeLevelCls(level);
         return '<div class="correction-item ' + cls + '">' +
-          '<div class="correction-q">' + esc(h.prompt) + '<span class="grade-pill grade-' + cls + '">' + gradeLevelLabel(level) + '</span></div>' + exerciseFigureHtml(h) +
+          '<div class="correction-q">' + escAi(h.prompt) + '<span class="grade-pill grade-' + cls + '">' + gradeLevelLabel(level) + '</span></div>' + exerciseFigureHtml(h) +
           '<div class="correction-ans ' + (h.wasCorrect ? "good" : "bad") + '">Ta réponse : ' + esc(h.yourAnswer || "(vide)") + '</div>' +
           gradeMistakesHtml(h.mistakes) +
           (level === "correct" ? '' : '<div class="correction-ans good">Bonne réponse : ' + esc(h.correctAnswer) + '</div>') +
@@ -1274,7 +1274,7 @@
     var q = qz.questions[qz.idx];
     var body = '<div class="quiz-batch-note">' + qz.totalEarned + ' pts gagnés jusqu\'ici</div>' +
       '<div class="quiz-q-num">Question ' + (qz.idx + 1) + ' / ' + qz.questions.length + '</div>' +
-      '<div class="quiz-q-text">' + esc(q.prompt) + '</div>' + exerciseFigureHtml(q);
+      '<div class="quiz-q-text">' + escAi(q.prompt) + '</div>' + exerciseFigureHtml(q);
 
     if (q.type === "qcm") {
       body += q.choices.map(function (c, i) {

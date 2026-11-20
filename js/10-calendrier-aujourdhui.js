@@ -388,8 +388,8 @@
       '<div class="fc-bar"><div class="fc-bar-fill" style="width:' + Math.round((s.idx / s.ids.length) * 100) + '%"></div></div>' +
       '<div class="fc-hint">Essaie de répondre de tête, puis retourne la carte</div>' +
       '<div class="flip-card' + (s.flipped ? " flipped" : "") + '" onclick="App.srsFlip()"><div class="flip-inner">' +
-      '<div class="flip-face"><span class="flip-eyebrow">Question</span><span class="flip-text">' + esc(c.q) + '</span></div>' +
-      '<div class="flip-face flip-face-back"><span class="flip-eyebrow">Réponse</span><span class="flip-text">' + esc(c.a) + '</span></div>' +
+      '<div class="flip-face"><span class="flip-eyebrow">Question</span><span class="flip-text">' + escAi(c.q) + '</span></div>' +
+      '<div class="flip-face flip-face-back"><span class="flip-eyebrow">Réponse</span><span class="flip-text">' + escAi(c.a) + '</span></div>' +
       '</div></div>' +
       (s.flipped
         ? '<div class="fc-controls"><button class="btn btn-ghost" style="flex:1" onclick="App.srsAnswer(false)">❌ Ratée (demain)</button><button class="btn btn-primary" style="flex:1" onclick="App.srsAnswer(true)">✅ Sue</button></div>'
