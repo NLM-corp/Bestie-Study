@@ -23,7 +23,7 @@
   function calEnsureView() {
     if (!calView) {
       var saved = null;
-      try { saved = localStorage.getItem("studino-cal-mode"); } catch (e) {}
+      try { saved = localStorage.getItem("bestie-cal-mode"); } catch (e) {}
       calView = { mode: saved === "week" || saved === "day" ? saved : "month", date: calDateStr(new Date()) };
     }
     return calView;
@@ -402,7 +402,7 @@
      Tout est stocké dans ce navigateur : vider ses données, changer d'appareil ou un nettoyage du
      navigateur effacerait tout. On demande au navigateur de garder les données (stockage persistant)
      et on rappelle d'exporter une sauvegarde au moins une fois par semaine. */
-  var LAST_EXPORT_KEY = "studino-last-export";
+  var LAST_EXPORT_KEY = "bestie-last-export";
   function lastExportAt() { try { return Number(localStorage.getItem(LAST_EXPORT_KEY)) || 0; } catch (e) { return 0; } }
   function hasDataWorthSaving() {
     var d = userData();

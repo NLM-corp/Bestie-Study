@@ -52,10 +52,10 @@
   var APP_COLORS = ["vert", "bleu", "jaune", "rose", "violet", "rouge", "orange"];
   var APP_COLOR_LABELS = { vert: "Vert", bleu: "Bleu", jaune: "Jaune", rose: "Rose", violet: "Violet", rouge: "Rouge", orange: "Orange" };
   (function initTheme() {
-    var saved = localStorage.getItem("recto_theme");
+    var saved = localStorage.getItem("bestie_theme");
     var theme = saved || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
     document.documentElement.setAttribute("data-app-theme", theme);
-    var savedColor = localStorage.getItem("recto_color");
+    var savedColor = localStorage.getItem("bestie_color");
     document.documentElement.setAttribute("data-app-color", APP_COLORS.indexOf(savedColor) !== -1 ? savedColor : "vert");
   })();
 

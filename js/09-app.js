@@ -38,12 +38,12 @@
       var cur = html.getAttribute("data-app-theme");
       var next = cur === "dark" ? "light" : "dark";
       html.setAttribute("data-app-theme", next);
-      localStorage.setItem("recto_theme", next);
+      localStorage.setItem("bestie_theme", next);
     },
     setAppColor: function (color) {
       if (APP_COLORS.indexOf(color) === -1) return;
       document.documentElement.setAttribute("data-app-color", color);
-      localStorage.setItem("recto_color", color);
+      localStorage.setItem("bestie_color", color);
       render();
     },
     setUserGender: function (g) {
@@ -636,7 +636,7 @@
     },
     setPodcastRate: function (r) {
       podcastRate = r;
-      try { localStorage.setItem("studino-podcast-rate", String(r)); } catch (e) {}
+      try { localStorage.setItem("bestie-podcast-rate", String(r)); } catch (e) {}
       var a = document.getElementById("podcast-audio");
       if (a) { a.defaultPlaybackRate = r; a.playbackRate = r; }
       document.querySelectorAll(".podcast-rate-btn").forEach(function (b) { b.classList.toggle("active", parseFloat(b.getAttribute("data-rate")) === r); });
@@ -707,7 +707,7 @@
     closeCourseChat: function (courseId) { courseChatOpen[courseId] = false; render(); },
     toggleCourseChatSize: function () {
       courseChatBig = !courseChatBig;
-      try { localStorage.setItem("studino-chat-big", courseChatBig ? "1" : "0"); } catch (e) {}
+      try { localStorage.setItem("bestie-chat-big", courseChatBig ? "1" : "0"); } catch (e) {}
       var box = document.getElementById("course-chat");
       if (box) box.classList.toggle("course-chat-big", courseChatBig);
       var btn = box && box.querySelector("[data-chat-size]");
@@ -1383,7 +1383,7 @@
       var v = calEnsureView();
       v.mode = mode;
       if (ds) v.date = ds;
-      try { localStorage.setItem("studino-cal-mode", mode); } catch (e) {}
+      try { localStorage.setItem("bestie-cal-mode", mode); } catch (e) {}
       render();
     },
     calMove: function (delta) {
@@ -1527,7 +1527,7 @@
       var url = URL.createObjectURL(blob);
       var a = document.createElement("a");
       a.href = url;
-      a.download = "studino-sauvegarde-" + new Date().toISOString().slice(0, 10) + ".json";
+      a.download = "bestie-sauvegarde-" + new Date().toISOString().slice(0, 10) + ".json";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

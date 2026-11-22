@@ -3,8 +3,8 @@
 // Fichier chargé dans l'ordre par index.html : les fichiers partagent les mêmes variables globales.
 
   /* ---------------- Gemini AI generation ---------------- */
-  var API_KEY_STORAGE = "studino_gemini_key";
-  var BACKUP_API_KEY_STORAGE = "studino_gemini_key_backup";
+  var API_KEY_STORAGE = "bestie_gemini_key";
+  var BACKUP_API_KEY_STORAGE = "bestie_gemini_key_backup";
   var GEMINI_MODELS = ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite"];
 
   function getApiKey() { return localStorage.getItem(API_KEY_STORAGE) || ""; }
@@ -16,26 +16,26 @@
   function setBackupApiKey(k) { if (k) localStorage.setItem(BACKUP_API_KEY_STORAGE, k); else localStorage.removeItem(BACKUP_API_KEY_STORAGE); }
   var apiKeyGuideShown = false; // une seule ouverture auto par chargement de page, cf. render()
 
-  var VOLUME_MUSIC_STORAGE = "studino_volume_music";
-  var VOLUME_SFX_STORAGE = "studino_volume_sfx";
+  var VOLUME_MUSIC_STORAGE = "bestie_volume_music";
+  var VOLUME_SFX_STORAGE = "bestie_volume_sfx";
   function getVolumeMusic() { var v = localStorage.getItem(VOLUME_MUSIC_STORAGE); return v === null ? 70 : parseInt(v, 10); }
   function getVolumeSfx() { var v = localStorage.getItem(VOLUME_SFX_STORAGE); return v === null ? 70 : parseInt(v, 10); }
 
-  var PRINT_SCALE_STORAGE = "studino_print_scale";
+  var PRINT_SCALE_STORAGE = "bestie_print_scale";
   function getPrintScale() { var v = localStorage.getItem(PRINT_SCALE_STORAGE); return v === null ? 1 : parseFloat(v); }
   function setPrintScale(v) { v = Math.max(0.6, Math.min(3, v)); localStorage.setItem(PRINT_SCALE_STORAGE, v.toFixed(2)); }
 
   // Genre de l'élève (facultatif) : utilisé uniquement pour que le conteur du Podcast s'adresse à lui
   // naturellement ("mon petit"/"ma petite") plutôt que de rester neutre par défaut faute d'info.
-  var USER_GENDER_STORAGE = "studino_user_gender";
+  var USER_GENDER_STORAGE = "bestie_user_gender";
   function getUserGender() { return localStorage.getItem(USER_GENDER_STORAGE) || ""; }
   function setUserGender(g) { if (["m", "f", "autre"].indexOf(g) !== -1) localStorage.setItem(USER_GENDER_STORAGE, g); else localStorage.removeItem(USER_GENDER_STORAGE); }
 
   // Rappel de révision : limite honnête, Studino est un site statique sans serveur de notifications
   // push — ça ne peut donc prévenir que si l'onglet est rouvert/déjà ouvert (un simple check au
   // démarrage), jamais en vrai arrière-plan comme une appli mobile. Mieux que rien, pas une vraie alarme.
-  var REMINDER_STORAGE = "studino_reminder_enabled";
-  var REMINDER_LAST_NOTIF_STORAGE = "studino_reminder_last_notif";
+  var REMINDER_STORAGE = "bestie_reminder_enabled";
+  var REMINDER_LAST_NOTIF_STORAGE = "bestie_reminder_last_notif";
   function getReminderEnabled() { return localStorage.getItem(REMINDER_STORAGE) === "1"; }
   function setReminderEnabled(v) { localStorage.setItem(REMINDER_STORAGE, v ? "1" : "0"); }
   function checkRevisionReminder() {
@@ -791,7 +791,7 @@
      Une génération = une suite de phases pondérées { label, weight, type, scale } (scale = taille du travail,
      ex. nombre de pages : la durée apprise est ramenée à une unité, puis multipliée) ; genSub() donne
      l'avancement RÉEL à l'intérieur de la phase en cours quand il est connu. */
-  var GEN_DURATIONS_KEY = "studino-gen-durations";
+  var GEN_DURATIONS_KEY = "bestie-gen-durations";
   var GEN_DEFAULT_MS = { pageTranscript: 35000, figTile: 20000, figZoom: 12000, figures: 60000, course: 90000, exerciseImport: 60000, podcastScript: 120000, ttsChunk: 45000, sheet: 70000, sheetSchema: 25000, methodo: 50000, examPlan: 40000, finish: 15000, step: 30000 };
   var genDurations = {};
   try { genDurations = JSON.parse(localStorage.getItem(GEN_DURATIONS_KEY) || "{}") || {}; } catch (e) {}

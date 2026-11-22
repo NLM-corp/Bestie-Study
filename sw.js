@@ -2,12 +2,12 @@
 // Pages, scripts et styles : toujours la version en ligne d'abord (pour avoir les mises à jour),
 // la copie gardée seulement si le réseau ne répond pas. Images et sons : la copie gardée d'abord.
 // Les autres sites (IA Gemini, bibliothèques) ne passent pas par ici.
-var CACHE = "studino-v26"; // à changer quand les images changent : les anciennes copies en cache sont supprimées
+var CACHE = "bestie-v26"; // à changer quand les images changent : les anciennes copies en cache sont supprimées
 
 self.addEventListener("install", function () { self.skipWaiting(); });
 self.addEventListener("activate", function (e) {
   e.waitUntil(caches.keys().then(function (keys) {
-    return Promise.all(keys.filter(function (k) { return k !== CACHE; }).map(function (k) { return caches.delete(k); }));
+    return Promise.all(keys.filter(function (k) { return k.indexOf("bestie-") === 0 && k !== CACHE; }).map(function (k) { return caches.delete(k); }));
   }).then(function () { return self.clients.claim(); }));
 });
 

@@ -43,8 +43,8 @@
     ]);
     return html + '</div>';
   }
-  var DB_KEY = "recto_v1"; // ancien stockage localStorage — gardé uniquement pour la migration one-shot vers IndexedDB
-  var IDB_NAME = "studino_db", IDB_STORE = "kv", IDB_ENTRY = "db";
+  var DB_KEY = "bestie_recto_v1"; // ancien stockage localStorage — gardé uniquement pour la migration one-shot vers IndexedDB
+  var IDB_NAME = "bestie_db", IDB_STORE = "kv", IDB_ENTRY = "db";
 
   /* ---------------- Storage : IndexedDB (bien plus de place que les ~5-10 Mo de localStorage),
      avec repli automatique sur localStorage si IndexedDB est indisponible ---------------- */

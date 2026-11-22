@@ -533,7 +533,7 @@
   // Vitesse de lecture choisie (x0,5 à x2), gardée d'un podcast/partie à l'autre et entre les visites.
   var PODCAST_RATES = [0.5, 1, 1.5, 2];
   var podcastRate = 1;
-  try { var savedRate = parseFloat(localStorage.getItem("studino-podcast-rate")); if (PODCAST_RATES.indexOf(savedRate) >= 0) podcastRate = savedRate; } catch (e) {}
+  try { var savedRate = parseFloat(localStorage.getItem("bestie-podcast-rate")); if (PODCAST_RATES.indexOf(savedRate) >= 0) podcastRate = savedRate; } catch (e) {}
   function podcastRateLabel(r) { return "x" + String(r).replace(".", ","); }
   var podcastAutoPlayNext = false; // mis à true juste avant de naviguer vers la partie suivante en fin de lecture
   function podcastFormatTime(sec) {
@@ -1378,7 +1378,7 @@
   var courseChatDraft = {};   // courseId → texte en cours de frappe (survit aux re-rendus)
   var courseChatScrollIntoView = false;
   var courseChatBig = false; // fenêtre du chat agrandie (gardée d'un cours à l'autre)
-  try { courseChatBig = localStorage.getItem("studino-chat-big") === "1"; } catch (e) {}
+  try { courseChatBig = localStorage.getItem("bestie-chat-big") === "1"; } catch (e) {}
   var courseChatStream = {};  // courseId → texte de la réponse en train de s'écrire
   // Chat : modèle le plus rapide d'abord (pas besoin du plus puissant pour expliquer un cours), les
   // autres en secours si celui-ci est à quota ou indisponible.
