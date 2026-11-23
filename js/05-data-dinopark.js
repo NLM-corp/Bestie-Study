@@ -1,5 +1,5 @@
 "use strict";
-// Studino — état, fusion, icônes, Dino Park, DinoTime, connexion
+// Bestie Study — état, fusion, icônes, Room, DinoTime, connexion
 // Fichier chargé dans l'ordre par index.html : les fichiers partagent les mêmes variables globales.
 
   /* ---------------- Router state ---------------- */
@@ -17,7 +17,7 @@
   var methodoTrainState = {}; // per methodology id: { chapterId, mechanic } — choix courant du panneau "S'entraîner"
   var methodoItemOpen = {}; // per practice item id: bool — replié par défaut une fois plusieurs sujets accumulés
   var methodoTranscriptionOpen = {}; // per methodology id: bool — repliée par défaut, pour vérifier que rien n'a été perdu par rapport au document du prof
-  var dpView = { mode: "hub" }; // Dino Park in-memory sub-navigation
+  var dpView = { mode: "hub" }; // Room in-memory sub-navigation
   var dtState = { mode: "setup", tab: "chrono", durationMin: 25, enclosureId: null, pomoWork: 25, pomoBreak: 5, pomoCycles: 4, pomoDinoId: null }; // DinoTime sub-navigation
   var dtRunning = null; // { enclosureId, remainingSec, endsAt, dinos: [...], paused }
   var dtPomoRunning = null; // { dinoId, workMin, breakMin, cycles, phase: "work"|"break", cycleIndex, remainingSec, endsAt, paused }
@@ -92,7 +92,7 @@
     merged.revisionSheets = mergeArraysById(merged.revisionSheets, loser.revisionSheets);
     merged.examPreps = mergeArraysById(merged.examPreps, loser.examPreps);
     merged.calendarEvents = mergeArraysById(merged.calendarEvents || [], loser.calendarEvents || []);
-    // Dino Park n'est pas qu'un objet à prendre en bloc d'un seul côté : dinosaures/œufs/enclos ont
+    // Room n'est pas qu'un objet à prendre en bloc d'un seul côté : dinosaures/œufs/enclos ont
     // chacun un id stable (jamais régénéré), donc on peut — et on doit — les fusionner comme le reste,
     // sinon un dino attrapé UNIQUEMENT sur l'appareil "perdant" serait purement et simplement perdu à
     // la fusion. mergeArraysById ne duplique jamais rien (un id déjà présent n'est jamais rajouté), donc
@@ -256,6 +256,50 @@
       palette: { o: "#3A5A32" }
     }
   };
+  SPRITES.heart = {
+    rows: [
+      "..ooo.ooo..",
+      ".obbbobbbo.",
+      "obhhbbbbbbo",
+      "obhbbbbbbbo",
+      "obbebbbebbo",
+      "obpbbmbbpbo",
+      ".obbbbbbbo.",
+      "..obbbbbo..",
+      "...obbbo...",
+      "....obo....",
+      ".....o....."
+    ],
+    palette: { o: "#8A3A5C", b: "#F27AA6", h: "#FFD6E6", e: "#3E1D2C", p: "#E0507F", m: "#3E1D2C" }
+  };
+  SPRITES.star = {
+    rows: [
+      "....o....",
+      "...oyo...",
+      "...oyo...",
+      "oooyyyooo",
+      "oyyyyyyyo",
+      ".oyyyyyo.",
+      "..oyyyo..",
+      ".oyyoyyo.",
+      ".oyo.oyo.",
+      ".oo...oo."
+    ],
+    palette: { o: "#B5617F", y: "#FFC2D9" }
+  };
+  SPRITES.bow = {
+    rows: [
+      "oo.......oo",
+      "obo.....obo",
+      "obbo.o.obbo",
+      "obbbokobbbo",
+      "obbo.o.obbo",
+      "obo.....obo",
+      "oo.......oo"
+    ],
+    palette: { o: "#A04570", b: "#F7A8C8", k: "#E27AA5" }
+  };
+  SPRITES.dinoBig = SPRITES.heart; SPRITES.dino = SPRITES.heart; SPRITES.footprint = SPRITES.star; SPRITES.fern = SPRITES.bow;
   function sprite(name, px, opts) {
     opts = opts || {};
     var key = name + "_" + px;
@@ -268,17 +312,17 @@
     return '<img class="' + cls + '" src="' + spriteCache[key] + '" width="' + w + '" height="' + h + '" alt="" style="' + (opts.style || "") + '">';
   }
   function genLogo() {
-    return '<img class="sprite sprite-bob" src="assets/objects/ui/DinoPark.png" alt="" style="width:72px;height:auto;">';
+    return sprite("heart", 6, { className: "heart-beat" });
   }
 
-  /* ---------------- Dino Park : data ---------------- */
+  /* ---------------- Room : data ---------------- */
   var DP_ZONES = [
-    { id: "foret", name: "Forêt", emoji: "🌳", cost: 0, color: "#3E7A3F" },
-    { id: "plaine", name: "Plaine", emoji: "🌾", cost: 750, color: "#B7A23A" },
-    { id: "desert", name: "Désert", emoji: "🏜️", cost: 1500, color: "#D9A253" },
-    { id: "arctique", name: "Arctique", emoji: "❄️", cost: 3000, color: "#8FC7E0" },
-    { id: "marine", name: "Marine", emoji: "🌊", cost: 5000, color: "#2E7BAA" },
-    { id: "volcanique", name: "Volcanique", emoji: "🌋", cost: 8000, color: "#B14A2E" }
+    { id: "foret", name: "Bibliothèque", emoji: "📚", cost: 0, color: "#C77DA8" },
+    { id: "plaine", name: "Garde-robe", emoji: "👗", cost: 750, color: "#B98FD6", soon: true },
+    { id: "desert", name: "Coiffeuse", emoji: "💄", cost: 1500, color: "#E79AB0", soon: true },
+    { id: "arctique", name: "Arctique", emoji: "❄️", cost: 3000, color: "#8FC7E0", hidden: true },
+    { id: "marine", name: "Marine", emoji: "🌊", cost: 5000, color: "#2E7BAA", hidden: true },
+    { id: "volcanique", name: "Volcanique", emoji: "🌋", cost: 8000, color: "#B14A2E", hidden: true }
   ];
   function dpZone(id) { return DP_ZONES.find(function (z) { return z.id === id; }); }
   var DP_PORTAL_ZONE_FILE = { foret: "Foret", plaine: "Plaine", desert: "Desert", arctique: "Artique", marine: "Marin", volcanique: "Volcanique" };
@@ -785,7 +829,7 @@
       // du coût d'achat pour compenser, maintenant que le bug est corrigé.
       dp.encBuildBugRefund = true;
       dp.points += DP_ENCLOSURE_BUILD_COST;
-      toast("🎁 +" + DP_ENCLOSURE_BUILD_COST + " pts remboursés suite à un bug d'achat d'enclos corrigé");
+      toast("🎁 +" + DP_ENCLOSURE_BUILD_COST + " $ remboursés suite à un bug d'achat d'enclos corrigé");
     }
     if (!dp.shops) dp.shops = {};
     if (dp.companionSpeciesId === undefined) dp.companionSpeciesId = null;
@@ -1033,14 +1077,14 @@
 
   function renderDinoParkHub() {
     var dp = dpData();
-    var head = '<div class="page-head"><div><div class="page-title-row"><img class="page-title-logo" src="assets/objects/ui/DinoPark.png" alt=""><h1 class="page-title">Dino Park</h1></div><p class="page-sub">Ton île principale — choisis un portail pour explorer une zone.</p></div></div>';
+    var head = '<div class="page-head"><div><div class="page-title-row"><img class="page-title-logo" src="assets/objects/ui/DinoPark.png" alt=""><h1 class="page-title">Room</h1></div><p class="page-sub">Ta chambre — choisis un espace à décorer.</p></div></div>';
     var needy = dpAttentionList();
     var alertBanner = needy.length ? '<div class="dp-hub-alert">⚠️ ' + needy.length + ' dino' + (needy.length > 1 ? "s ont besoin" : " a besoin") + ' d\'attention (faim ou maladie)' +
       '<button class="btn btn-sm btn-primary" onclick="App.dpSelectDino(\'' + needy[0].id + '\')">Voir</button></div>' : '';
-    var points = '<div class="dp-points-badge">🪙 ' + dp.points + ' points</div>';
-    var actions = '<div class="dp-actions"><button class="btn btn-ghost" onclick="App.dpGoLab()">🧪 Laboratoire</button><button class="btn btn-ghost" onclick="App.dpGoEncyclopedia()">📖 Encyclopédie</button><button class="btn btn-primary" style="width:auto" onclick="App.dpGoQuiz()">🧠 Gagner des points</button></div>';
-    var zoneGrid = '<div class="dp-zone-grid">' + DP_ZONES.map(function (z) {
-      var unlocked = dp.unlockedZones.indexOf(z.id) !== -1;
+    var points = '<div class="dp-points-badge">💵 ' + dp.points + ' $</div>';
+    var actions = '<div class="dp-actions"><button class="btn btn-ghost" onclick="App.dpGoEncyclopedia()">📖 Encyclopédie</button><button class="btn btn-primary" style="width:auto" onclick="App.dpGoQuiz()">🧠 Gagner des dollars</button></div>';
+    var zoneGrid = '<div class="dp-zone-grid">' + DP_ZONES.filter(function (z) { return !z.hidden; }).map(function (z) {
+      var unlocked = !z.soon && dp.unlockedZones.indexOf(z.id) !== -1;
       if (unlocked) {
         // le tourbillon du portail tourne (12 images) ; au clic il accélère et t'aspire avant d'entrer
         return '<button class="dp-zone-card" onclick="App.dpEnterPortal(this, \'' + z.id + '\')">' +
@@ -1048,13 +1092,13 @@
           '<div class="dp-zone-sign">' + esc(z.name) + '</div>' +
           '</button>';
       }
-      var stocked = dpZoneFullyStocked(z.id);
+      var stocked = !z.soon && dpZoneFullyStocked(z.id);
       var canUnlock = stocked && dp.points >= z.cost;
       return '<div class="dp-zone-card locked">' +
         '<div class="dp-zone-portal" style="background-image:url(\'' + dpPortalArtPath(z.id, true) + '\')"></div>' +
         '<div class="dp-zone-sign">' + esc(z.name) + '</div>' +
         (stocked
-          ? '<div class="dp-zone-meta mono">' + z.cost + ' pts</div>' +
+          ? '<div class="dp-zone-meta mono">' + z.cost + ' $</div>' +
             '<button class="btn btn-sm ' + (canUnlock ? "btn-primary" : "btn-ghost") + '" ' + (canUnlock ? "" : "disabled") + ' onclick="App.dpUnlockZone(\'' + z.id + '\')">Débloquer</button>'
           : '<div class="dp-zone-meta mono">Bientôt disponible</div>' +
             '<button class="btn btn-sm btn-ghost" disabled title="Cette zone n\'a pas encore tous ses dinosaures">Indisponible</button>') +
@@ -1082,7 +1126,7 @@
       '</button>' +
       '<button class="dp-merchant-trigger' + (canBuyEnc ? "" : " dp-merchant-trigger-dim") + '" onclick="App.dpBuildEnclosure(\'' + zoneId + '\')">' +
       '<span class="dp-merchant-trigger-icon">🏕️</span><span>Construire un enclos</span>' +
-      '<span class="dp-merchant-trigger-timer mono">' + encCost + ' pts</span>' +
+      '<span class="dp-merchant-trigger-timer mono">' + encCost + ' $</span>' +
       '</button>' +
       '</div>';
 
@@ -1106,7 +1150,7 @@
           '<div class="dp-enclosure-head"><span>' + esc(dpEnclosureDisplayName(e)) + '</span><span class="dp-enclosure-count mono">' + dinos.length + '/' + e.capacity + '</span></div>' +
           '<div class="dp-enc-info"><span>Déco niveau ' + e.level + '/3</span>' +
           (upgradeCost != null
-            ? '<button class="btn btn-sm ' + (canUpgrade ? "btn-primary" : "btn-ghost") + '" ' + (canUpgrade ? "" : "disabled") + ' onclick="App.dpUpgradeEnclosure(\'' + e.id + '\')">Améliorer (' + upgradeCost + ' pts)</button>'
+            ? '<button class="btn btn-sm ' + (canUpgrade ? "btn-primary" : "btn-ghost") + '" ' + (canUpgrade ? "" : "disabled") + ' onclick="App.dpUpgradeEnclosure(\'' + e.id + '\')">Améliorer (' + upgradeCost + ' $)</button>'
             : '<span class="dp-empty-note">Niveau max</span>') +
           '</div>' +
           '</div>' +
@@ -1179,14 +1223,14 @@
       var dp = dpData();
       dp.points += earned;
       saveDB();
-      toast("+" + earned + " pts !");
+      toast("+" + earned + " $ !");
     }
     qz.history.push({ prompt: q.prompt, yourAnswer: yourAnswerText, correctAnswer: correctAnswerText, explanation: q.explanation, wasCorrect: wasCorrect, level: level, mistakes: mistakes || [], figureSvg: q.figureSvg || "" });
   }
 
   function renderDinoParkQuiz() {
     var backBtn = '<button class="btn btn-ghost" style="width:auto;margin-bottom:20px" onclick="App.dpGoHub()">← Retour au spawn</button>';
-    var head = '<div class="page-head"><div><div class="page-title-row">' + sprite("dino", 4) + '<h1 class="page-title">Répondre à des questions</h1></div><p class="page-sub">Révise tes cours importés pour gagner des points.</p></div></div>';
+    var head = '<div class="page-head"><div><div class="page-title-row">' + sprite("dino", 4) + '<h1 class="page-title">Répondre à des questions</h1></div><p class="page-sub">Révise tes cours importés pour gagner des dollars.</p></div></div>';
 
     if (!dpView.quiz) {
       var nav = dpView.quizNav || (dpView.quizNav = { level: "subjects" });
@@ -1241,7 +1285,7 @@
             return '<div class="dp-subject-card" style="cursor:default">' +
               '<div style="font-weight:700;font-size:12.5px;margin-bottom:8px">' + esc(co.title) + '</div>' +
               (qCount ? '<button class="btn btn-sm btn-primary" style="width:100%;margin-bottom:6px" onclick="App.dpStartCourseQuiz(\'' + co.id + '\')">🧠 Questions (' + qCount + ')</button>' : '') +
-              (exCount ? '<button class="btn btn-sm btn-ghost" style="width:100%" onclick="App.dpStartCourseExercise(\'' + co.id + '\')">✏️ Exercice (+' + DP_EXERCISE_POINTS + ' pts)</button>' : '') +
+              (exCount ? '<button class="btn btn-sm btn-ghost" style="width:100%" onclick="App.dpStartCourseExercise(\'' + co.id + '\')">✏️ Exercice (+' + DP_EXERCISE_POINTS + ' $)</button>' : '') +
               '</div>';
           }).join("") + '</div></div>';
       }
@@ -1265,14 +1309,14 @@
           '</div>';
       }).join("");
       renderShell(["dinopark"], backBtn + head +
-        '<div class="result-hero"><div class="result-score mono">+' + qz.totalEarned + '</div><div class="result-total">points gagnés · ' + qz.correct + '/' + (qz.correct + qz.wrong) + ' bonnes réponses</div></div>' +
+        '<div class="result-hero"><div class="result-score mono">+' + qz.totalEarned + '</div><div class="result-total">dollars gagnés · ' + qz.correct + '/' + (qz.correct + qz.wrong) + ' bonnes réponses</div></div>' +
         '<button class="btn btn-ghost" style="width:auto;margin:0 auto 26px;display:flex" onclick="App.dpGoQuiz()">Choisir un autre cours</button>' +
         '<h3 style="font-size:16px;margin-bottom:12px">Correction</h3>' + items);
       return;
     }
 
     var q = qz.questions[qz.idx];
-    var body = '<div class="quiz-batch-note">' + qz.totalEarned + ' pts gagnés jusqu\'ici</div>' +
+    var body = '<div class="quiz-batch-note">' + qz.totalEarned + ' $ gagnés jusqu\'ici</div>' +
       '<div class="quiz-q-num">Question ' + (qz.idx + 1) + ' / ' + qz.questions.length + '</div>' +
       '<div class="quiz-q-text">' + escAi(q.prompt) + '</div>' + exerciseFigureHtml(q);
 
@@ -1326,7 +1370,7 @@
       body += '<div class="rte-display" style="color:var(--text-muted);font-size:13.5px;margin-bottom:6px">Ta réponse :</div>' +
         '<div class="rte-display" style="margin-bottom:14px">' + (qz.answerHtml || "<em>(vide)</em>") + '</div>' +
         '<div class="quiz-feedback ' + excls + '">' +
-        '<div class="quiz-feedback-title ' + excls + '" style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span>' + gradeLevelLabel(exlvl) + (qz.pointsEarned ? " ! +" + qz.pointsEarned + " pts" : "") + '</span>' + gradeScoreBadge(qz.score, qz.scoreMax) + '</div>' +
+        '<div class="quiz-feedback-title ' + excls + '" style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span>' + gradeLevelLabel(exlvl) + (qz.pointsEarned ? " ! +" + qz.pointsEarned + " $" : "") + '</span>' + gradeScoreBadge(qz.score, qz.scoreMax) + '</div>' +
         gradeMistakesHtml(qz.mistakes) +
         '<div class="correction-exp">' + mdToHtml(qz.feedback) + '</div>' +
         '</div>' +
@@ -1532,7 +1576,7 @@
   }
 
   function renderDinoTimeSetup() {
-    var head = '<div class="page-head"><div><div class="page-title-row"><img class="page-title-logo" src="assets/objects/ui/DinoTime.png" alt=""><h1 class="page-title">DinoTime</h1></div><p class="page-sub">Chronomètre ton temps de travail — tes dinos t\'accompagnent en arrière-plan.</p></div></div>';
+    var head = '<div class="page-head"><div><div class="page-title-row"><img class="page-title-logo" src="assets/objects/ui/DinoTime.png" alt=""><h1 class="page-title">Timer</h1></div><p class="page-sub">Chronomètre ton temps de travail — tes dinos t\'accompagnent en arrière-plan.</p></div></div>';
     var tabsHtml = '<div class="tabs">' +
       '<button class="tab-btn ' + (dtState.tab !== "pomodoro" ? "active" : "") + '" onclick="App.dtSetTab(\'chrono\')">⏱️ Chrono simple</button>' +
       '<button class="tab-btn ' + (dtState.tab === "pomodoro" ? "active" : "") + '" onclick="App.dtSetTab(\'pomodoro\')">🍅 Pomorodosaure</button>' +
@@ -1552,7 +1596,7 @@
 
     var encHtml;
     if (!encs.length) {
-      encHtml = '<div class="empty-state">' + sprite("dinoBig", 5, { bob: true }) + '<h3>Aucun enclos construit</h3><p>Va dans Dino Park pour construire un enclos et y installer des dinos avant de lancer une séance.</p></div>';
+      encHtml = '<div class="empty-state">' + sprite("dinoBig", 5, { bob: true }) + '<h3>Aucun enclos construit</h3><p>Va dans Room pour construire un enclos et y installer des dinos avant de lancer une séance.</p></div>';
     } else {
       encHtml = '<div class="dp-section"><h3 class="dp-section-title">Quel enclos veux-tu regarder ?</h3>' +
         DP_ZONES.map(function (zone) {
@@ -1901,7 +1945,7 @@
       sprite("fern", 6, { className: "fern-corner", style: "right:14%;top:16%;transform:scaleX(-1);" }) +
       '<div class="auth-card">' +
       sprite("dinoBig", 6, { className: "auth-mascot sprite-bob" }) +
-      '<div class="wordmark">Studino<span class="dot">.</span></div>' +
+      '<div class="wordmark">Bestie Study</div>' +
       '<p class="auth-sub">' + (isLogin ? "Connecte-toi pour retrouver tes cours." : "Crée ton espace personnel de révision.") + '</p>' +
       (authError ? '<div class="error-msg">' + authError + '</div>' : '') +
       '<form onsubmit="App.submitAuth(event, \'' + (isLogin ? "login" : "signup") + '\')">' +

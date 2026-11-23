@@ -1,5 +1,5 @@
 "use strict";
-// Studino — podcast et méthodologies (génération)
+// Bestie Study — podcast et méthodologies (génération)
 // Fichier chargé dans l'ordre par index.html : les fichiers partagent les mêmes variables globales.
 
   /* ---------------- Podcast (un vieux conteur raconte le cours en audio) ----------------
@@ -8,12 +8,7 @@
      à partir de ce script). Les sous-titres sont calés sur la durée réelle de l'audio en répartissant
      chaque phrase proportionnellement à sa longueur — pas d'horodatage mot-à-mot fourni par l'API, mais
      une approximation largement suffisante pour suivre à l'oreille. */
-  var PODCAST_DIR = "assets/objects/vieux papi/";
-  var PODCAST_ATTEND_IMGS = ["PapiAttend.png", "PapiAttend2.png", "PapiAttend3.png", "PapiAttend4.png"];
-  var PODCAST_EXPLIQUE_IMGS = ["PapiExplique.png", "PapiExplique2.png", "PapiExplique3.png", "PapiExplique4.png", "PapiExplique5.png", "PapiExplique6.png"];
-  var PODCAST_LIS_IMG = "PapiLis.png";
   var GEMINI_TTS_MODELS = ["gemini-3.8-flash-tts", "gemini-3.8-flash-lite-tts"];
-  var PODCAST_VOICE = "Algenib"; // voix masculine "gravelly" du catalogue Gemini — colle au personnage du vieux conteur
 
   function podcastData() { return userData().podcasts; }
   function podcastFind(id) { return podcastData().find(function (p) { return p.id === id; }); }
@@ -30,7 +25,7 @@
           type: "object",
           properties: {
             title: { type: "string", description: "Titre court et accrocheur de cette partie du podcast." },
-            script: { type: "string", description: "Texte intégral à lire à voix haute par le narrateur, dans la langue fixée par la consigne de LANGUE (français courant par défaut), SANS aucune balise, markdown, puce ou didascalie entre parenthèses — uniquement les phrases parlées telles qu'elles doivent être prononcées, prêtes à être envoyées telles quelles à une synthèse vocale." }
+            script: { type: "string", description: "Texte intégral à lire à voix haute par la bestie, dans la langue fixée par la consigne de LANGUE (français courant par défaut), SANS aucune balise, markdown, puce ou didascalie entre parenthèses — uniquement les phrases parlées telles qu'elles doivent être prononcées, prêtes à être envoyées telles quelles à une synthèse vocale." }
           },
           required: ["title", "script"]
         }
@@ -42,15 +37,15 @@
   // savoir. Tout en anglais = le connaître EN anglais ; mélangé avec du français = le COMPRENDRE.
   var PODCAST_LANG_MODES = [["auto", "Auto (recommandé)"], ["fr", "Français"], ["target", "Entièrement dans la langue du cours"], ["bilingual", "Bilingue (explications en français)"]];
   var PODCAST_LANG_HINTS = {
-    auto: "Le conteur choisit selon ton cours : cours entièrement en anglais, espagnol, japonais… → il te l'explique dans cette langue ; cours mélangé avec du français → bilingue ; cours en français → en français.",
+    auto: "Ta bestie choisit selon ton cours : cours entièrement en anglais, espagnol, japonais… → elle te l'explique dans cette langue ; cours mélangé avec du français → bilingue ; cours en français → en français.",
     fr: "Tout en français.",
-    target: "Le même podcast que d'habitude, mais entièrement dans la langue du cours.",
-    bilingual: "Le conteur explique en français, en disant les mots et expressions clés dans la langue du cours."
+    target: "Le même call que d'habitude, mais entièrement dans la langue du cours.",
+    bilingual: "Ta bestie explique en français, en disant les mots et expressions clés dans la langue du cours."
   };
-  // Pas d'analyse ligne par ligne : le conteur explique le cours EXACTEMENT comme d'habitude, juste dans
+  // Pas d'analyse ligne par ligne : la bestie explique le cours EXACTEMENT comme d'habitude, juste dans
   // la bonne langue.
   function podcastLanguageRule(mode) {
-    var target = "écris TOUT le script dans la langue du cours : c'est exactement le même podcast que d'habitude (même conteur, même façon de raconter et d'expliquer le cours, mêmes règles), simplement dans cette langue au lieu du français. N'analyse pas le cours phrase par phrase et ne le traduis pas : explique-le, comme tu le ferais en français. Phrases claires et vocabulaire proche de celui du cours, pour un élève qui apprend cette langue.";
+    var target = "écris TOUT le script dans la langue du cours : c'est exactement le même podcast que d'habitude (même bestie, même façon de raconter et d'expliquer le cours, mêmes règles), simplement dans cette langue au lieu du français. N'analyse pas le cours phrase par phrase et ne le traduis pas : explique-le, comme tu le ferais en français. Phrases claires et vocabulaire proche de celui du cours, pour un élève qui apprend cette langue.";
     var bilingual = "explique le cours exactement comme d'habitude, en français, mais dis dans la langue étrangère les mots, expressions et notions clés que le cours donne dans cette langue (avec leur sens), pour que l'élève les reconnaisse. N'analyse pas le cours phrase par phrase.";
     var script = " Écris toute langue étrangère dans son orthographe et son écriture normales (japonais, chinois, arabe, russe, coréen... jamais en romanisation), sinon la voix la prononce mal.";
     if (mode === "fr") return "LANGUE : le podcast est entièrement en français.";
@@ -69,27 +64,21 @@
     "(c) contenu en français : tout en français, comme d'habitude. " +
     "Dans les cas (a) et (b), un texte en langue étrangère à étudier (texte littéraire, article, discours, dialogue, poème, chanson...) est retranscrit MOT POUR MOT, sans le reformuler ni le corriger, même s'il existe déjà sur internet — la règle de reformulation des textes publics ne s'applique PAS à lui. Écris chaque langue dans son orthographe et son écriture normales. Les noms des champs JSON ne changent jamais.\n\n";
   function buildPodcastScriptPrompt(subjectName, scopeName, scopeLevel, content, retryReason, langMode) {
-    var gender = getUserGender();
-    var genderNote = gender === "m"
-      ? "L'élève qui t'écoute est un garçon : si tu t'adresses directement à lui (une interpellation affectueuse, pas à chaque phrase), utilise des formulations masculines (\"mon petit\", \"mon grand\", \"jeune homme\"), jamais féminines."
-      : gender === "f"
-      ? "L'élève qui t'écoute est une fille : si tu t'adresses directement à elle (une interpellation affectueuse, pas à chaque phrase), utilise des formulations féminines (\"ma petite\", \"ma grande\", \"jeune demoiselle\"), jamais masculines."
-      : "Tu ne connais pas le genre de l'élève qui t'écoute : si tu t'adresses directement à lui/elle, utilise des formulations neutres (\"mon enfant\", \"jeune ami\", \"toi qui m'écoutes\") plutôt qu'un terme genré.";
-    return "Tu es un vieux conteur chevronné : un ancien professeur devenu archéologue sur le tard, aussi chaleureux et bienveillant qu'un grand-père mais PAS un grand-père de famille — un vieux savant plein d'anecdotes de terrain qui adore raconter des histoires pour transmettre son savoir à un jeune élève qui l'écoute en podcast. Voici le cours (matière : " + subjectName + ", " + podcastScopeLabel(scopeLevel) + " : " + scopeName + ") à partir duquel tu dois créer ce podcast.\n\n" +
+    return bestieStyle(true) + "\n\nTu appelles ta bestie au téléphone pour lui raconter son cours comme le plus gros gossip de l'année. Elle t'écoute, c'est toi qui parles. Voici le cours (matière : " + subjectName + ", " + podcastScopeLabel(scopeLevel) + " : " + scopeName + ") à partir duquel tu dois créer cet appel (appelé « podcast » ci-dessous).\n\n" +
       "Règles absolues :\n" +
-      "- " + genderNote + "\n" +
+      "- TON GOSSIP : les personnages, notions, lois et formules deviennent les protagonistes du drama (qui a fait quoi à qui, pourquoi, les conséquences), avec des apartés, des réactions, des questions à ta bestie. Commence l'appel comme une vraie copine (allô, tu devineras jamais) et raccroche à la fin pareil.\n" +
       "- " + podcastLanguageRule(langMode) + "\n" +
       "- Base-toi UNIQUEMENT sur le contenu du cours fourni ci-dessous : n'invente, ne déforme et n'ajoute AUCUN fait, date, chiffre, nom ou notion qui n'y figure pas. Tout ce que tu racontes doit rester rigoureusement exact par rapport à ce cours précis.\n" +
       "- Couvre l'INTÉGRALITÉ du contenu du cours, sans rien oublier ni laisser de côté — chaque notion, définition, date, formule ou règle du cours doit se retrouver quelque part dans le podcast.\n" +
-      "- Ce n'est PAS une récitation : ne lis pas le cours tel quel et ne te contente pas de l'énoncer dans l'ordre. Transforme-le en un vrai récit engageant et vivant — raconte, pose des questions rhétoriques, utilise des images et des comparaisons parlantes, varie le ton, crée un peu de curiosité ou de suspense avant de révéler une notion — comme un grand-père passionnant qui sait captiver, jamais comme un robot qui réciterait une liste. Ne te contente JAMAIS de mentionner une notion en une seule phrase rapide : prends le temps de vraiment l'expliquer en profondeur — le contexte, le \"pourquoi\" et pas seulement le \"quoi\", un exemple concret, une comparaison parlante, le lien avec ce qui précède — avant de passer à la suivante.\n" +
-      "- STRUCTURE NARRATIVE OBLIGATOIRE — le piège le plus fréquent, à éviter à tout prix : garder le même déroulé que le cours (les mêmes sections, dans le même ordre, juste reformulées avec un ton de conteur). Ça reste de la récitation déguisée même si chaque phrase individuelle est bien écrite, et c'est un ÉCHEC. Un vrai conteur NE SUIT PAS le plan du cours : il part d'une accroche, d'une question, d'une scène ou d'une énigme, puis tisse les notions ENSEMBLE au fil d'un vrai fil narratif (une enquête à résoudre, une question qui trouve sa réponse petit à petit, un voyage, un fil conducteur qui revient régulièrement), quitte à aller et venir entre les notions plutôt que de les aligner une par une dans l'ordre où le cours les présente. Teste-toi avant de répondre : si on pouvait reconnaître le sommaire du cours juste en lisant l'ordre de ton script, c'est raté, recommence la structure. Chaque passage d'une notion à une autre doit être un vrai lien de sens (parce que..., ce qui explique..., ce qui nous amène à...), jamais une simple transition d'étape du type \"passons maintenant à...\" ou \"ensuite, parlons de...\".\n" +
+      "- Ce n'est PAS une récitation : ne lis pas le cours tel quel et ne te contente pas de l'énoncer dans l'ordre. Transforme-le en un vrai récit engageant et vivant — raconte, pose des questions rhétoriques, utilise des images et des comparaisons parlantes, varie le ton, crée un peu de curiosité ou de suspense avant de révéler une notion — comme une meilleure amie qui tient le gossip du siècle, jamais comme un robot qui réciterait une liste. Ne te contente JAMAIS de mentionner une notion en une seule phrase rapide : prends le temps de vraiment l'expliquer en profondeur — le contexte, le \"pourquoi\" et pas seulement le \"quoi\", un exemple concret, une comparaison parlante, le lien avec ce qui précède — avant de passer à la suivante.\n" +
+      "- STRUCTURE NARRATIVE OBLIGATOIRE — le piège le plus fréquent, à éviter à tout prix : garder le même déroulé que le cours (les mêmes sections, dans le même ordre, juste reformulées avec un ton de copine). Ça reste de la récitation déguisée même si chaque phrase individuelle est bien écrite, et c'est un ÉCHEC. Une bestie qui raconte NE SUIT PAS le plan du cours : il part d'une accroche, d'une question, d'une scène ou d'une énigme, puis tisse les notions ENSEMBLE au fil d'un vrai fil narratif (une enquête à résoudre, une question qui trouve sa réponse petit à petit, un voyage, un fil conducteur qui revient régulièrement), quitte à aller et venir entre les notions plutôt que de les aligner une par une dans l'ordre où le cours les présente. Teste-toi avant de répondre : si on pouvait reconnaître le sommaire du cours juste en lisant l'ordre de ton script, c'est raté, recommence la structure. Chaque passage d'une notion à une autre doit être un vrai lien de sens (parce que..., ce qui explique..., ce qui nous amène à...), jamais une simple transition d'étape du type \"passons maintenant à...\" ou \"ensuite, parlons de...\".\n" +
       "- PRÉCISION CONCRÈTE OBLIGATOIRE, règle à prendre très au sérieux : dès que le cours mentionne un élément nommé et identifiable — une expérience scientifique, un événement historique, une loi, un texte ou traité, une découverte, un personnage, une technique, un processus... — tu dois TOUJOURS raconter CE QUE C'EST CONCRÈTEMENT, pas seulement son nom ou sa conclusion. Exemples de ce qu'il NE FAUT JAMAIS faire : dire \"une expérience a permis de démontrer que...\" sans raconter en quoi consistait cette expérience (qui l'a menée, sur quoi, comment, ce qui a été observé) ; dire \"tel événement a marqué un tournant...\" sans raconter ce qui s'est concrètement passé pendant cet événement. Si le cours source donne ce détail concret, raconte-le fidèlement et en profondeur ; si le cours source NE donne PAS ce détail (juste le nom et la conclusion), dis-le explicitement à l'élève plutôt que de glisser dessus en silence comme si de rien n'était (ex. \"le cours ne détaille pas comment cette expérience a été menée, mais on sait qu'elle a montré que...\") — n'invente JAMAIS un détail qui ne figure pas dans le cours. La précision prime toujours sur la longueur : mieux vaut une partie plus longue mais qui explique vraiment chaque élément cité, qu'une partie qui enchaîne des noms et des conclusions sans jamais s'arrêter dessus.\n" +
-      "- MATIÈRES AVEC FORMULES/MÉTHODES DE CALCUL (maths, physique-chimie, et toute matière avec des démarches techniques) : c'est le cas où un conteur a le plus tendance à bâcler, parce qu'une formule semble \"aride\" à raconter — c'est une erreur, le raisonnement EST le récit. Pour CHAQUE formule/méthode du cours : raconte D'OÙ elle vient (sa logique, sa démonstration si le cours la donne, sinon au moins l'intuition de pourquoi elle marche), explique CE QUE représente concrètement chaque terme/symbole, QUAND et POURQUOI on s'en sert plutôt que d'une autre, puis déroule à voix haute UN SEUL exemple d'application chiffré, pas à pas, bien choisi et détaillé du début à la fin. Un seul exemple bien expliqué vaut infiniment mieux que plusieurs exemples expédiés — ne multiplie JAMAIS les exemples juste pour faire du volume, ce serait du remplissage inutile, pas de la pédagogie. L'objectif est que l'élève ressorte capable de réellement APPLIQUER la méthode lui-même à un contrôle, pas d'avoir juste entendu son nom passer.\n" +
+      "- MATIÈRES AVEC FORMULES/MÉTHODES DE CALCUL (maths, physique-chimie, et toute matière avec des démarches techniques) : c'est le cas où on a le plus tendance à bâcler, parce qu'une formule semble \"aride\" à raconter — c'est une erreur, le raisonnement EST le récit. Pour CHAQUE formule/méthode du cours : raconte D'OÙ elle vient (sa logique, sa démonstration si le cours la donne, sinon au moins l'intuition de pourquoi elle marche), explique CE QUE représente concrètement chaque terme/symbole, QUAND et POURQUOI on s'en sert plutôt que d'une autre, puis déroule à voix haute UN SEUL exemple d'application chiffré, pas à pas, bien choisi et détaillé du début à la fin. Un seul exemple bien expliqué vaut infiniment mieux que plusieurs exemples expédiés — ne multiplie JAMAIS les exemples juste pour faire du volume, ce serait du remplissage inutile, pas de la pédagogie. L'objectif est que l'élève ressorte capable de réellement APPLIQUER la méthode lui-même à un contrôle, pas d'avoir juste entendu son nom passer.\n" +
       "- DURÉE par partie : entre 1600 et 3500 mots (à l'oral, environ 10 à 22 minutes) — c'est un PLANCHER STRICT, pas un objectif approximatif : une partie de moins de 1600 mots (par exemple une partie d'1 minute) est un ÉCHEC CRITIQUE, quelle que soit la matière, y compris en maths/physique-chimie où le réflexe fautif est d'aller trop vite sur les formules. Pas de plafond strict non plus : si vraiment détailler précisément chaque élément du cours (voir règles de précision et de formules ci-dessus) demande d'aller au-delà de 3500 mots pour une partie donnée, ne sacrifie JAMAIS la précision pour respecter ce chiffre. Si le contenu du cours semble court, ne raccourcis JAMAIS le podcast pour autant : développe chaque notion bien plus en profondeur (contexte, exemples, implications, reformulations, liens entre les notions) plutôt que de rester en surface — mais sans padding artificiel ni exemples répétés juste pour gonfler le compte de mots, la profondeur doit rester utile à la compréhension. Avant de répondre, vérifie mentalement : est-ce que CHAQUE partie dépasse bien 1600 mots ? Si une partie est clairement plus courte que les autres, c'est le signe qu'elle a été bâclée — reprends-la. Un podcast de 2-3 minutes qui survole le cours est un ÉCHEC total, même s'il est exact et complet sur le papier — l'élève doit ressortir prêt pour un contrôle sur cette matière, pas avec un simple aperçu.\n" +
       "- NOMBRE DE PARTIES — PROCÉDURE OBLIGATOIRE, ne saute aucune étape : un biais fréquent est de retomber par habitude sur un nombre \"qui sonne bien\" (souvent 2) sans vraiment calculer, même avec la consigne \"aucune limite\" — pour éviter ça, tu DOIS calculer avant de décider. Étape 1 : remplis \"notionCount\" en comptant une par une les notions/sous-thèmes distincts du cours. Étape 2 : remplis \"estimatedTotalWords\" en estimant le nombre de mots nécessaires pour toutes les couvrir en vraie profondeur (150 à 400 mots par notion simple, bien plus pour une formule/méthode à expliquer avec un exemple). Étape 3 : SEULEMENT APRÈS avoir rempli ces deux chiffres, déduis le nombre de parties par le calcul estimatedTotalWords / 3000 (arrondi au-dessus) — PAS par intuition. Il N'Y A AUCUNE LIMITE HAUTE — ni 2, ni 3, ni 5 : si le calcul donne 7 parties, fais 7 parties, ne te bride jamais en pensant qu'un podcast \"a déjà assez de parties\". Si le calcul donne 1 (tout tient dans 1600-3500 mots en profondeur), fais UNE SEULE partie — ne découpe JAMAIS artificiellement. Chaque partie respecte elle-même la fourchette de 1600 à 3500 mots, sans chevauchement ni répétition d'une partie à l'autre, et sans rien oublier au global.\n" +
-      "- Le \"script\" de chaque partie est le texte EXACT à lire à voix haute : uniquement des phrases parlées naturelles, aucun titre, aucune puce, aucun markdown, aucune parenthèse de mise en scène — seulement ce que le narrateur dit, du début à la fin.\n" +
+      "- Le \"script\" de chaque partie est le texte EXACT à lire à voix haute : uniquement des phrases parlées naturelles, aucun titre, aucune puce, aucun markdown, aucune parenthèse de mise en scène — seulement ce que tu dis, du début à la fin.\n" +
       "- Commence chaque partie par une accroche qui donne envie d'écouter, et termine par une petite conclusion qui boucle le sujet de cette partie (ou du podcast entier s'il n'y a qu'une seule partie).\n" +
-      "- INTERDIT ABSOLU : aucune notation LaTeX, aucun symbole mathématique brut ($, ^, _, \\frac, °, %, =, ×...) ni aucune abréviation qui se prononcerait mal lue telle quelle — une synthèse vocale va lire ce texte MOT POUR MOT. Écris TOUT en toutes lettres, exactement comme un professeur le dirait à voix haute : \"2^3\" devient \"deux puissance trois\", \"H2O\" devient \"H deux O\" dit \"aitch deux o\" ou plus naturellement \"eau\", \"50%\" devient \"cinquante pour cent\", \"20°C\" devient \"vingt degrés Celsius\", \"=\" devient \"égale\", une fraction \"3/4\" devient \"trois quarts\". Fais cette conversion pour CHAQUE formule, unité ou nombre technique du cours, sans exception.\n" +
+      "- INTERDIT ABSOLU : aucune notation LaTeX, aucun symbole mathématique brut ($, ^, _, \\frac, °, %, =, ×...) ni aucune abréviation qui se prononcerait mal lue telle quelle — une synthèse vocale va lire ce texte MOT POUR MOT. Écris TOUT en toutes lettres, exactement comme on le dirait à voix haute : \"2^3\" devient \"deux puissance trois\", \"H2O\" devient \"H deux O\" dit \"aitch deux o\" ou plus naturellement \"eau\", \"50%\" devient \"cinquante pour cent\", \"20°C\" devient \"vingt degrés Celsius\", \"=\" devient \"égale\", une fraction \"3/4\" devient \"trois quarts\". Fais cette conversion pour CHAQUE formule, unité ou nombre technique du cours, sans exception.\n" +
       "- Respecte une orthographe irréprochable dans chaque langue utilisée, avec tous les accents nécessaires (en français : é, è, ê, à, ç, etc.) — la synthèse vocale prononce mal un mot mal orthographié ou mal accentué. Les nombres et unités s'écrivent en toutes lettres dans la langue où ils sont prononcés.\n\n" +
       (retryReason === "short" ? "[Note système — IMPORTANT : ta tentative précédente a produit au moins une partie BEAUCOUP trop courte (loin en dessous de 1600 mots, parfois à peine 1 minute à l'oral) — c'est un échec strict de la consigne de durée. Cette fois, développe réellement CHAQUE notion en profondeur (surtout les formules/méthodes si la matière en a) jusqu'à dépasser 1600 mots sur CHAQUE partie, quitte à prendre plus de temps par explication. Ne recommence pas la même erreur.]\n\n" : "") +
       (retryReason === "partcount" ? "[Note système — IMPORTANT : ta tentative précédente a toi-même estimé qu'il fallait plus de mots au total que ce que tu as réellement écrit dans \"parts\" — autrement dit tu as sous-estimé le nombre de parties nécessaires par rapport à ton propre calcul. Cette fois, suis VRAIMENT la procédure : compte notionCount, calcule estimatedTotalWords, puis fixe le nombre de parties sur ce calcul (estimatedTotalWords / 3000, arrondi au-dessus) sans te brider par habitude. Ne recommence pas la même erreur.]\n\n" : "") +
@@ -544,7 +533,7 @@
     pending.forEach(function (p) { delete p.pendingReplace; });
     setTimeout(gcPodcastAudio, 0);
     saveDB();
-    toast("🎙️ Podcast actualisé : « " + podcastGroupDisplayName(pending) + " »");
+    toast("🎙️ Call actualisé : « " + podcastGroupDisplayName(pending) + " »");
     if (viewingOld) navigate("#/podcasts/" + pending[0].id);
     else render();
   }
@@ -560,7 +549,7 @@
     podcast.processingStartedAt = Date.now();
     podcast.error = null; podcast.errorStatus = null; podcast.errorDetail = null;
     genStart(podcast.id, [
-      { label: "Le conteur écrit son texte", weight: 30, type: "podcastScript", scale: Math.max(1, String(content || "").length / 20000) },
+      { label: bestie().name + " prépare son récit", weight: 30, type: "podcastScript", scale: Math.max(1, String(content || "").length / 20000) },
       { label: "Enregistrement de la voix", weight: 70, type: "ttsChunk", learn: false }
     ]);
     saveDB(); render();
@@ -612,7 +601,7 @@
 
         if (i === 0) genPhase(pod.id, "Enregistrement de la voix");
         else genStart(pod.id, [{ label: "Enregistrement de la voix", weight: 100, type: "ttsChunk", learn: false }]);
-        generatePodcastAudio(pod.script, PODCAST_VOICE, podcastVoiceProgress(pod.id)).then(function (audioUrl) {
+        generatePodcastAudio(pod.script, bestieVoiceFor(pod), podcastVoiceProgress(pod.id)).then(function (audioUrl) {
           return audioDurationFromDataUrl(audioUrl).then(function (duration) {
             return storePodcastAudio(pod, audioUrl).then(function () { return duration; });
           }).then(function (duration) {
@@ -642,7 +631,7 @@
       podcast.errorStatus = err.status || null;
       podcast.errorDetail = err.detail || null;
       saveDB();
-      toast("Échec de la génération du podcast : " + (err.message || "erreur inconnue"), { status: err.status, detail: err.detail });
+      toast("Échec de la génération du call : " + (err.message || "erreur inconnue"), { status: err.status, detail: err.detail });
       render();
     });
   }
@@ -657,7 +646,7 @@
     pod.processingStartedAt = Date.now();
     pod.error = null; pod.errorStatus = null; pod.errorDetail = null;
     saveDB(); render();
-    return generatePodcastAudio(pod.script, PODCAST_VOICE, podcastVoiceProgress(pod.id)).then(function (audioUrl) {
+    return generatePodcastAudio(pod.script, bestieVoiceFor(pod), podcastVoiceProgress(pod.id)).then(function (audioUrl) {
       return audioDurationFromDataUrl(audioUrl).then(function (duration) {
         return storePodcastAudio(pod, audioUrl).then(function () { return duration; });
       }).then(function (duration) {

@@ -1,5 +1,5 @@
 "use strict";
-// Studino — prépa contrôle (génération et séances)
+// Bestie Study — prépa contrôle (génération et séances)
 // Fichier chargé dans l'ordre par index.html : les fichiers partagent les mêmes variables globales.
 
   /* ---------------- Prépa examens ---------------- */
@@ -363,8 +363,8 @@
      des réponses vérifiées (jamais par du simple temps passé), avec rendements décroissants près de
      100 et pénalité plus lourde en cas d'erreurs répétées ou de fausse confiance (score déjà haut). --- */
   var EP_MASTERY_WEIGHT = { qcm: 1, open: 1.4, exercise: 2.2 };
-  // Points Dino Park gagnés par bonne réponse pendant une séance de prépa — un cran sous les montants
-  // équivalents du quiz/exercice dédiés de Dino Park (25 / 150), puisqu'une prépa se rejoue "Refaire la
+  // Points Room gagnés par bonne réponse pendant une séance de prépa — un cran sous les montants
+  // équivalents du quiz/exercice dédiés de Room (25 / 150), puisqu'une prépa se rejoue "Refaire la
   // séance" à volonté ; ça reste une vraie récompense quotidienne sans permettre de exploser l'économie.
   var EP_SESSION_POINTS_PER_CORRECT = { qcm: 12, open: 16, exercise: 40 };
   function epSessionPointsEarned(s) {
@@ -711,7 +711,7 @@
       saveDB();
       s.readinessAfter = readinessAfter;
       s.pointsEarned = pointsEarned;
-      if (pointsEarned > 0) toast("+" + pointsEarned + " pts Dino Park !");
+      if (pointsEarned > 0) toast("+" + pointsEarned + " $ !");
     }
     s.readinessBefore = readinessBefore;
     s.review = review;

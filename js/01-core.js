@@ -1,8 +1,8 @@
 "use strict";
-// Studino — stockage, images, audio, schémas
+// Bestie Study — stockage, images, audio, schémas
 // Fichier chargé dans l'ordre par index.html : les fichiers partagent les mêmes variables globales.
 
-  var APP_VERSION = "16.3"; // +0.1 à chaque push sur GitHub, pour que l'utilisateur puisse vérifier qu'il a bien la dernière version
+  var APP_VERSION = "1.4"; // +0.1 à chaque push sur GitHub, pour que l'utilisateur puisse vérifier qu'il a bien la dernière version
   // Installation sur l'écran d'accueil : Chrome/Edge/Android proposent l'installation par un événement
   // qu'on garde pour le bouton des paramètres ; l'iPhone n'en a pas, on explique la marche à suivre.
   var installPromptEvent = null;
@@ -17,29 +17,29 @@
       return '<details class="install-guide"' + (device === id ? " open" : "") + '><summary>' + title + (device === id ? ' <span class="install-here">ton appareil</span>' : "") + '</summary>' +
         '<ol>' + steps.map(function (s) { return "<li>" + s + "</li>"; }).join("") + '</ol>' + (extra || "") + '</details>';
     };
-    var html = '<div class="field"><label>📲 Installer Studino comme une appli</label>';
+    var html = '<div class="field"><label>📲 Installer Bestie Study comme une appli</label>';
     if (isInstalledApp()) html += '<p class="install-ok">✅ Tu utilises déjà l\'appli installée.</p>';
     else {
-      html += '<p class="modal-warn" style="margin:0 0 8px">Studino s\'ouvre alors depuis ton écran d\'accueil, en plein écran, comme une vraie appli. Rien à télécharger sur un store.</p>';
+      html += '<p class="modal-warn" style="margin:0 0 8px">Bestie Study s\'ouvre alors depuis ton écran d\'accueil, en plein écran, comme une vraie appli. Rien à télécharger sur un store.</p>';
       if (installPromptEvent) html += '<button type="button" class="btn btn-sm btn-primary" style="width:auto;margin-bottom:8px" onclick="App.installApp()">📲 Installer en un clic</button>';
     }
     html += guide("ios", "🍎 iPhone / iPad", [
-      "Ouvre Studino dans <b>Safari</b> (obligatoire : ça ne marche pas depuis Chrome ou une autre appli sur iPhone).",
+      "Ouvre Bestie Study dans <b>Safari</b> (obligatoire : ça ne marche pas depuis Chrome ou une autre appli sur iPhone).",
       "<b>Avant d'installer</b> : ici, dans Paramètres, appuie sur <b>⬇️ Exporter</b> pour sauvegarder tes données.",
       "Appuie sur le bouton <b>Partager</b> ⬆️ (le carré avec une flèche, en bas de l'écran).",
       "Fais défiler et choisis <b>« Sur l'écran d'accueil »</b>, puis <b>Ajouter</b>.",
-      "Ouvre Studino depuis la nouvelle icône 🦖, connecte-toi, puis dans Paramètres appuie sur <b>⬆️ Importer</b> et choisis le fichier exporté."
+      "Ouvre Bestie Study depuis la nouvelle icône 🦖, connecte-toi, puis dans Paramètres appuie sur <b>⬆️ Importer</b> et choisis le fichier exporté."
     ], '<p class="install-warn">⚠️ Sur iPhone, l\'appli installée ne voit pas les données de Safari : c\'est pour ça qu\'il faut exporter puis importer.</p>');
     html += guide("android", "🤖 Android", [
-      "Ouvre Studino dans <b>Chrome</b>.",
+      "Ouvre Bestie Study dans <b>Chrome</b>.",
       installPromptEvent ? "Appuie sur <b>📲 Installer en un clic</b> juste au-dessus." : "Appuie sur le menu <b>⋮</b> en haut à droite.",
       installPromptEvent ? "Confirme avec <b>Installer</b>." : "Choisis <b>« Installer l'application »</b> (ou « Ajouter à l'écran d'accueil »), puis <b>Installer</b>.",
       "L'icône 🦖 apparaît sur ton écran d'accueil : tes données sont déjà dedans."
     ]);
     html += guide("pc", "💻 Ordinateur (Chrome ou Edge)", [
-      installPromptEvent ? "Clique sur <b>📲 Installer en un clic</b> juste au-dessus." : "Clique sur l'icône d'installation à droite de la barre d'adresse (un écran avec une flèche), ou menu <b>⋮</b> → <b>« Installer Studino »</b>.",
+      installPromptEvent ? "Clique sur <b>📲 Installer en un clic</b> juste au-dessus." : "Clique sur l'icône d'installation à droite de la barre d'adresse (un écran avec une flèche), ou menu <b>⋮</b> → <b>« Installer Bestie Study »</b>.",
       "Confirme avec <b>Installer</b>.",
-      "Studino s'ouvre dans sa propre fenêtre et se lance depuis le menu Démarrer ou le bureau. Tes données sont déjà dedans."
+      "Bestie Study s'ouvre dans sa propre fenêtre et se lance depuis le menu Démarrer ou le bureau. Tes données sont déjà dedans."
     ]);
     return html + '</div>';
   }

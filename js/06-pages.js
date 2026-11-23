@@ -1,5 +1,5 @@
 "use strict";
-// Studino — barre latérale et pages
+// Bestie Study — barre latérale et pages
 // Fichier chargé dans l'ordre par index.html : les fichiers partagent les mêmes variables globales.
 
   /* ---------------- Sidebar / Shell ---------------- */
@@ -34,13 +34,13 @@
         if (ie) trail.push({ label: ie.title });
       }
     } else if (parts[0] === "dinopark") {
-      trail.push({ label: "Dino Park", action: "App.dpGoHub()" });
+      trail.push({ label: "Room", action: "App.dpGoHub()" });
       if (dpView.mode === "zone") { var z = dpZone(dpView.zoneId); if (z) trail.push({ label: z.name }); }
       else if (dpView.mode === "lab") trail.push({ label: "Laboratoire" });
       else if (dpView.mode === "encyclopedia") trail.push({ label: "Encyclopédie" });
       else if (dpView.mode === "quiz") trail.push({ label: "Questions" });
     } else if (parts[0] === "dinotime") {
-      trail.push({ label: "DinoTime" });
+      trail.push({ label: "Timer" });
     } else if (parts[0] === "revision" && parts[1]) {
       var rs = userData().revisionSheets.find(function (x) { return x.id === parts[1]; });
       if (rs) trail.push({ label: rs.title });
@@ -64,9 +64,9 @@
     } else if (parts[0] === "calendar") {
       trail.push({ label: "Calendrier" });
     } else if (parts[0] === "podcasts") {
-      trail.push({ label: "Podcast", hash: "#/podcasts" });
+      trail.push({ label: "Call", hash: "#/podcasts" });
       if (parts[1] === "lib") {
-        trail.push({ label: "Mes podcasts", hash: "#/podcasts/lib" });
+        trail.push({ label: "Mes calls", hash: "#/podcasts/lib" });
         var ps = parts[2] ? findSubject(parts[2]) : null;
         if (ps) trail.push({ label: ps.name, hash: "#/podcasts/lib/" + ps.id });
         var pt = ps && parts[3] ? findTheme(ps, parts[3]) : null;
@@ -107,18 +107,18 @@
     var theme = document.documentElement.getAttribute("data-app-theme") || "light";
     var html = '<div class="shell">' +
       '<aside class="sidebar' + (mobileNavOpen ? " sidebar-open" : "") + '">' +
-      '<div class="sidebar-top"><div class="wordmark" style="font-size:13px"><img src="assets/objects/ui/DinoPark.png" alt="" style="width:20px;height:20px;object-fit:contain;margin-right:4px;vertical-align:-4px;">Studino<span class="dot">.</span></div>' +
+      '<div class="sidebar-top"><div class="wordmark" style="font-size:13px"><img src="assets/objects/ui/Logo.png" alt="" style="width:20px;height:20px;object-fit:contain;margin-right:4px;vertical-align:-4px;">Bestie Study</div>' +
       '<button class="icon-btn" title="Nouvelle matière" onclick="App.closeMobileNav();App.openModal(\'subject\')" style="background:none;border:1px solid var(--border);border-radius:7px;padding:5px;cursor:pointer;color:var(--text)">' + icon("plus") + '</button>' +
       '<button class="mobile-nav-close" onclick="App.toggleMobileNav()" aria-label="Fermer le menu">✕</button>' +
       '</div>' +
-      '<button class="nav-item ' + (parts[0] === "today" || parts[0] === "review" ? "active" : "") + '" onclick="App.closeMobileNav();location.hash=\'#/today\'"><span class="nav-icon-img nav-icon-emoji" aria-hidden="true">☀️</span> Aujourd\'hui</button>' +
+      '<button class="nav-item ' + (parts[0] === "today" || parts[0] === "review" ? "active" : "") + '" onclick="App.closeMobileNav();location.hash=\'#/today\'"><img class="nav-icon-img" src="assets/objects/ui/Aujourdhui.png" alt=""> Aujourd\'hui</button>' +
       '<button class="nav-item ' + (parts.length === 0 ? "active" : "") + '" onclick="App.closeMobileNav();location.hash=\'#/\'"><img class="nav-icon-img" src="assets/objects/ui/Menu.png" alt=""> Menu</button>' +
       '<button class="nav-item ' + (parts[0] === "exercices" ? "active" : "") + '" onclick="App.closeMobileNav();location.hash=\'#/exercices\'"><img class="nav-icon-img" src="assets/objects/ui/MesExos.png" alt=""> Mes exercices</button>' +
-      '<button class="nav-item ' + (parts[0] === "dinopark" ? "active" : "") + '" onclick="App.closeMobileNav();App.dpGoHub()"><img class="nav-icon-img" src="assets/objects/ui/DinoPark.png" alt=""> Dino Park' + (dpAttentionList().length ? '<span class="nav-alert-dot" title="Des dinos ont besoin d\'attention"></span>' : '') + '</button>' +
-      '<button class="nav-item ' + (parts[0] === "dinotime" ? "active" : "") + '" onclick="App.closeMobileNav();App.dtGoDinoTime()"><img class="nav-icon-img" src="assets/objects/ui/DinoTime.png" alt=""> DinoTime</button>' +
+      '<button class="nav-item ' + (parts[0] === "dinopark" ? "active" : "") + '" onclick="App.closeMobileNav();App.dpGoHub()"><img class="nav-icon-img" src="assets/objects/ui/DinoPark.png" alt=""> Room' + (dpAttentionList().length ? '<span class="nav-alert-dot" title="Des dinos ont besoin d\'attention"></span>' : '') + '</button>' +
+      '<button class="nav-item ' + (parts[0] === "dinotime" ? "active" : "") + '" onclick="App.closeMobileNav();App.dtGoDinoTime()"><img class="nav-icon-img" src="assets/objects/ui/DinoTime.png" alt=""> Timer</button>' +
       '<button class="nav-item ' + (parts[0] === "examprep" ? "active" : "") + '" onclick="App.closeMobileNav();location.hash=\'#/examprep\'"><img class="nav-icon-img" src="assets/objects/ui/MissionControle.png" alt=""> Mission Contrôle</button>' +
       '<button class="nav-item ' + (parts[0] === "methodologies" ? "active" : "") + '" onclick="App.closeMobileNav();location.hash=\'#/methodologies\'"><img class="nav-icon-img" src="assets/objects/ui/Méthodologie.png" alt=""> Méthodologie</button>' +
-      '<button class="nav-item ' + (parts[0] === "podcasts" ? "active" : "") + '" onclick="App.closeMobileNav();location.hash=\'#/podcasts\'"><img class="nav-icon-img" src="assets/objects/ui/Podcast.png" alt=""> Podcast</button>' +
+      '<button class="nav-item ' + (parts[0] === "podcasts" ? "active" : "") + '" onclick="App.closeMobileNav();location.hash=\'#/podcasts\'"><img class="nav-icon-img" src="assets/objects/ui/Podcast.png" alt=""> Call</button>' +
       '<button class="nav-item ' + (parts[0] === "calendar" ? "active" : "") + '" onclick="App.closeMobileNav();location.hash=\'#/calendar\'"><img class="nav-icon-img" src="assets/objects/ui/Calendrier.png" alt=""> Calendrier</button>' +
       '<div class="sidebar-bottom">' +
       '<div class="theme-row"><span class="theme-label">Paramètres</span><button class="btn btn-sm btn-ghost" style="width:auto" onclick="App.closeMobileNav();App.openSettingsModal()">⚙️ Ouvrir</button></div>' +
@@ -127,7 +127,7 @@
       '</aside>' +
       (mobileNavOpen ? '<div class="sidebar-backdrop" onclick="App.toggleMobileNav()"></div>' : '') +
       '<div class="main">' +
-      '<div class="topbar"><button class="mobile-nav-toggle" onclick="App.toggleMobileNav()" aria-label="Menu">☰</button><div class="breadcrumb">' + renderBreadcrumb(parts) + '</div>' + (parts[0] === "dinopark" ? '<div class="topbar-points mono">🪙 <span class="dp-points-value">' + dpData().points + '</span></div>' : '') + '</div>' +
+      '<div class="topbar"><button class="mobile-nav-toggle" onclick="App.toggleMobileNav()" aria-label="Menu">☰</button><div class="breadcrumb">' + renderBreadcrumb(parts) + '</div>' + (parts[0] === "dinopark" ? '<div class="topbar-points mono">💵 <span class="dp-points-value">' + dpData().points + '</span></div>' : '') + '</div>' +
       '<div class="content' + (opts.narrow ? " content-narrow" : "") + '">' + contentHtml + '</div>' +
       '</div></div>';
     document.getElementById("app").innerHTML = html;
@@ -173,7 +173,7 @@
             dpSquareHtml(sp.id, { className: "dp-egg-img" }) +
             '<div class="dp-egg-name">' + esc(d.name) + '</div>' +
             '<div class="dp-rarity dp-rarity-' + sp.rarity + '">' + rarity.label + '</div>' +
-            '<div class="dp-egg-price mono">' + sellPrice + ' pts</div>' +
+            '<div class="dp-egg-price mono">' + sellPrice + ' $</div>' +
             (selected ? '<button class="btn btn-sm btn-primary" onclick="event.stopPropagation();App.dpConfirmSellDino()">Vendre</button>' : '') +
             '</div>';
         }).join("") + '</div>';
@@ -200,12 +200,12 @@
       toolsHtml = '<div class="dp-merchant-tools">' +
         '<div class="dp-mt-top"><span class="dp-shop-timer mono">' + mIc("piece") + '<span class="dp-points-value">' + dp.points + '</span></span>' +
         '<span class="dp-shop-timer mono">' + mIc("sablier") + '<span id="dp-shop-timer" data-zone="' + zoneId + '" data-bare>' + dpFormatCountdown(shopState.expiresAt - Date.now()) + '</span></span></div>' +
-        '<div class="dp-mt-left"><button class="dp-wood-btn" ' + (canRefresh ? "" : "disabled") + ' onclick="App.dpRefreshShop(\'' + zoneId + '\')">' + mIc("rafraichir") + 'Rafraîchir (' + DP_SHOP_REFRESH_COST + ' pts)</button>' +
+        '<div class="dp-mt-left"><button class="dp-wood-btn" ' + (canRefresh ? "" : "disabled") + ' onclick="App.dpRefreshShop(\'' + zoneId + '\')">' + mIc("rafraichir") + 'Rafraîchir (' + DP_SHOP_REFRESH_COST + ' $)</button>' +
         '<button class="dp-wood-btn" ' + (canLuck ? "" : "disabled") + ' onclick="App.dpLuckShop(\'' + zoneId + '\')">' +
-        mIc("trefle") + (luckMaxed ? "Chance max" : "Chance+ → " + dpLuckPercent(luckLevel + 1) + " % (" + DP_SHOP_LUCK_COST + " pts)") + '</button>' +
+        mIc("trefle") + (luckMaxed ? "Chance max" : "Chance+ → " + dpLuckPercent(luckLevel + 1) + " % (" + DP_SHOP_LUCK_COST + " $)") + '</button>' +
         (slotsMaxed
           ? '<button class="dp-wood-btn" disabled>' + mIc("oeuf") + DP_SHOP_SLOTS_MAX + ' œufs (max)</button>'
-          : '<button class="dp-wood-btn" ' + (dp.points >= slotCost ? "" : "disabled") + ' onclick="App.dpUpgradeShopSlots(\'' + zoneId + '\')">' + mIc("oeuf") + curSlots + ' → ' + (curSlots + 1) + ' œufs (' + slotCost + ' pts)</button>') + '</div>' +
+          : '<button class="dp-wood-btn" ' + (dp.points >= slotCost ? "" : "disabled") + ' onclick="App.dpUpgradeShopSlots(\'' + zoneId + '\')">' + mIc("oeuf") + curSlots + ' → ' + (curSlots + 1) + ' œufs (' + slotCost + ' $)</button>') + '</div>' +
         '<div class="dp-mt-luck">' + luckHtml + '</div><div class="dp-mt-right"><button class="dp-wood-btn" onclick="App.dpStartSellDino()">' + mIc("sac") + 'Vendre des dinos</button></div>' +
         '</div>';
       // Comme chez le vendeur d'objets : seulement la marchandise sur le comptoir. Chaque œuf est dans sa
@@ -225,7 +225,7 @@
             '<div class="dp-crate-tooltip">' +
             '<div class="dp-egg-name">' + esc(sp.name) + '</div>' +
             '<div class="dp-rarity dp-rarity-' + sp.rarity + '">' + rarity.label + '</div>' +
-            '<div class="dp-egg-price mono">' + rarity.price + ' pts</div>' +
+            '<div class="dp-egg-price mono">' + rarity.price + ' $</div>' +
             '<button class="btn btn-sm ' + (canBuy ? "btn-primary" : "btn-ghost") + '" onclick="App.dpBuyEgg(\'' + zoneId + '\',\'' + sp.id + '\',' + idx + ')">Acheter</button>' +
             (hasEnclosure ? "" : '<div class="dp-egg-warn">Enclos requis</div>') +
             '</div></div>';
@@ -254,7 +254,7 @@
         '<div class="dp-egg-name">' + esc(it.name) + '</div>' +
         (dietLine ? '<div class="dp-crate-diet">' + dietLine + '</div>' : '') +
         '<div class="dp-crate-qty">Contient ' + qty + ' ' + qtyLabel + '</div>' +
-        '<div class="dp-egg-price mono">' + it.price + ' pts</div>' +
+        '<div class="dp-egg-price mono">' + it.price + ' $</div>' +
         '<button class="btn btn-sm ' + (can ? "btn-primary" : "btn-ghost") + '" onclick="App.' + buyFn + '(\'' + it.id + '\')">Acheter</button>' +
         '</div>' +
         '</div>';
@@ -478,7 +478,7 @@
     var head = '<div class="course-head">' +
       (entry.images && entry.images.length ? '<img class="course-thumb" src="' + entry.images[0] + '">' : '') +
       '<div><h1 class="page-title" style="margin-bottom:6px">' + esc(entry.title) + '</h1>' +
-      '<p class="page-sub">' + (entry.subjectGuess ? esc(entry.subjectGuess) + " · " : "") + 'Exercice importé — ne rapporte pas de points Dino Park</p></div>' +
+      '<p class="page-sub">' + (entry.subjectGuess ? esc(entry.subjectGuess) + " · " : "") + 'Exercice importé — ne rapporte pas de dollars</p></div>' +
       (entry.status === "ready" && entry.images && entry.images.length ? '<div style="display:flex;gap:10px;margin-left:auto"><button class="btn btn-ghost btn-sm" style="width:auto" onclick="App.retryImportedExerciseGeneration(\'' + entry.id + '\')">🔄 Régénérer</button></div>' : '') +
       '</div>';
 
@@ -527,8 +527,6 @@
   /* ---------------- Podcast (pages) ---------------- */
   var podcastPlayerInterval = null;
   var podcastProcessingInterval = null;
-  var podcastIdleImgCache = null; // choisie une seule fois par session — ne doit pas changer à chaque clic
-  var podcastExpliqueByPod = {}; // per podcast id: index courant — stable tant qu'on reste sur CE podcast, change seulement toutes les ~60s
   var podcastFolderOpen = {}; // per groupId: bool — dossier de parties replié par défaut
   // Vitesse de lecture choisie (x0,5 à x2), gardée d'un podcast/partie à l'autre et entre les visites.
   var PODCAST_RATES = [0.5, 1, 1.5, 2];
@@ -546,7 +544,7 @@
       : p.status === "error" ? '<span class="status-pill status-processing">⚠️ Erreur</span>'
       : '<span class="status-pill status-ready">🎧 ' + podcastFormatTime(p.durationSec) + '</span>';
   }
-  var PODCAST_NEW_CONTENT_BADGE = '<span class="status-pill status-processing" title="Des cours ont été ajoutés ou modifiés depuis ce podcast">🆕 Nouveau contenu</span>';
+  var PODCAST_NEW_CONTENT_BADGE = '<span class="status-pill status-processing" title="Des cours ont été ajoutés ou modifiés depuis ce call">🆕 Nouveau contenu</span>';
   function podcastTileHtml(p) {
     var refreshHtml = podcastRefreshStatusHtml(podcastGroupKey(p));
     var hasNew = !refreshHtml && p.status === "ready" && podcastGroupHasNewContent([p]);
@@ -570,7 +568,7 @@
     var hasNew = !busy && !refreshHtml && podcastGroupHasNewContent(parts);
     if (!open) {
       return '<div class="tile" onclick="App.togglePodcastFolder(\'' + gid + '\')">' +
-        '<button class="tile-rename" style="right:10px" title="Renommer le podcast" onclick="event.stopPropagation();App.openRenameModal(\'podcastGroup\',null,null,null,\'' + gid + '\')">✏️</button>' +
+        '<button class="tile-rename" style="right:10px" title="Renommer le call" onclick="event.stopPropagation();App.openRenameModal(\'podcastGroup\',null,null,null,\'' + gid + '\')">✏️</button>' +
         '<div class="tile-icon">📁</div>' +
         '<div class="tile-title">' + esc(chapterName) + '</div>' +
         '<span class="demo-badge">' + parts.length + ' parties</span>' +
@@ -581,10 +579,10 @@
     var anyReady = parts.some(function (p) { return p.status === "ready"; });
     return '<div class="tile podcast-folder-open">' +
       '<div class="podcast-folder-head" onclick="App.togglePodcastFolder(\'' + gid + '\')"><div class="tile-icon">📂</div><div class="tile-title">' + esc(chapterName) + '</div>' +
-      '<button class="tile-rename" style="right:40px" title="Renommer le podcast" onclick="event.stopPropagation();App.openRenameModal(\'podcastGroup\',null,null,null,\'' + gid + '\')">✏️</button>' +
+      '<button class="tile-rename" style="right:40px" title="Renommer le call" onclick="event.stopPropagation();App.openRenameModal(\'podcastGroup\',null,null,null,\'' + gid + '\')">✏️</button>' +
       '<button class="tile-del" title="Supprimer toutes les parties" onclick="event.stopPropagation();App.askDelete(\'podcastGroup\',null,null,null,\'' + gid + '\')">' + icon("trash") + '</button></div>' +
       (anyReady ? '<button class="btn btn-ghost btn-sm" style="width:auto;margin-bottom:8px" ' + mp3ButtonAttrs("g:" + gid, "⬇️ Tout télécharger en un seul MP3") + ' onclick="event.stopPropagation();App.downloadPodcastGroupMp3(\'' + gid + '\')">' + mp3ButtonInner("g:" + gid, "⬇️ Tout télécharger en un seul MP3") + '</button>' : "") +
-      (hasNew ? '<button class="btn btn-primary btn-sm" style="width:auto;margin:0 0 8px 8px" onclick="event.stopPropagation();App.refreshPodcast(\'' + gid + '\')" title="Refait tout le podcast avec les cours à jour (consomme autant de quota voix qu\'un nouveau podcast)">🔄 Actualiser avec le nouveau contenu</button>' : "") +
+      (hasNew ? '<button class="btn btn-primary btn-sm" style="width:auto;margin:0 0 8px 8px" onclick="event.stopPropagation();App.refreshPodcast(\'' + gid + '\')" title="Refait tout le call avec les cours à jour (consomme autant de quota voix qu\'un nouveau call)">🔄 Actualiser avec le nouveau contenu</button>' : "") +
       (refreshHtml ? '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px">' + refreshHtml + '</div>' : "") +
       '<div class="podcast-folder-items">' + parts.map(function (p) {
         return '<div class="podcast-folder-item" onclick="location.hash=\'#/podcasts/' + p.id + '\'">' +
@@ -594,7 +592,7 @@
           '</div>';
       }).join("") + '</div></div>';
   }
-  // Où ranger un podcast dans « Mes podcasts » : on suit l'arborescence actuelle du Menu
+  // Où ranger un podcast dans « Mes calls » : on suit l'arborescence actuelle du Menu
   // (matière → thème → chapitre). Si son thème/chapitre/cours a disparu, il reste dans sa matière.
   function podcastPlace(p) {
     var subj = findSubject(p.subjectId);
@@ -626,7 +624,7 @@
   }
   function podcastCountLabel(items) {
     var n = podcastGroupCount(items);
-    return n + " podcast" + (n !== 1 ? "s" : "");
+    return n + " call" + (n !== 1 ? "s" : "");
   }
   // Tuiles des podcasts (un dossier par podcast en plusieurs parties), les plus récents d'abord.
   function podcastGroupsGridHtml(items) {
@@ -655,26 +653,24 @@
       '</div>';
   }
 
-  // Accueil Podcast : papi + deux gros boutons. La bibliothèque est rangée dans « Mes podcasts ».
+  // Accueil Podcast : papi + deux gros boutons. La bibliothèque est rangée dans « Mes calls ».
   function renderPodcastListPage() {
     var list = podcastVisibleList();
-    if (!podcastIdleImgCache) podcastIdleImgCache = PODCAST_ATTEND_IMGS[Math.floor(Math.random() * PODCAST_ATTEND_IMGS.length)];
     var busy = list.some(function (p) { return p.status === "processing"; });
-    var note = busy ? '🎙️ Un podcast est en préparation, tu le retrouveras dans « Mes podcasts ».'
-      : !list.length ? 'Choisis un thème, un chapitre ou un cours, le vieux prof s\'occupe du reste.' : '';
+    var note = busy ? '🎙️ Un call est en préparation, tu le retrouveras dans « Mes calls ».'
+      : !list.length ? 'Choisis un thème, un chapitre ou un cours, ' + bestie().name + ' te raconte tout.' : '';
     var count = podcastGroupCount(list);
     var body = '<div class="podcast-fullscreen">' +
-      '<img src="' + PODCAST_DIR + podcastIdleImgCache + '" class="podcast-bg-img" alt="">' +
-      '<div class="podcast-fs-header"><button class="mobile-nav-toggle" style="background:rgba(255,255,255,0.14);border-color:rgba(255,255,255,0.4);color:#fff" onclick="App.toggleMobileNav()" aria-label="Menu">☰</button><div class="page-title-row"><img class="page-title-logo" src="assets/objects/ui/Podcast.png" alt=""><div class="podcast-fs-title">Podcast</div></div></div>' +
-      '<div class="podcast-home-actions">' +
-      '<button class="btn btn-metal podcast-home-btn" onclick="location.hash=\'#/podcasts/lib\'">📚 Mes podcasts' + (count ? ' <span class="podcast-home-count">' + count + '</span>' : '') + '</button>' +
-      '<button class="btn btn-primary podcast-home-btn" onclick="App.openPodcastModal()">' + icon("plus") + ' Nouveau podcast</button>' +
+      '<div class="podcast-fs-header"><button class="mobile-nav-toggle" style="background:rgba(255,255,255,0.14);border-color:rgba(255,255,255,0.4);color:#fff" onclick="App.toggleMobileNav()" aria-label="Menu">☰</button><div class="page-title-row"><img class="page-title-logo" src="assets/objects/ui/Podcast.png" alt=""><div class="podcast-fs-title">Call</div></div></div>' +
+      '<div class="call-wrap">' + bestiePhoneHtml("idle", bestie()) + '<div class="call-side call-actions">' +
+      '<button class="btn btn-metal podcast-home-btn" onclick="location.hash=\'#/podcasts/lib\'">📚 Mes calls' + (count ? ' <span class="podcast-home-count">' + count + '</span>' : '') + '</button>' +
+      '<button class="btn btn-primary podcast-home-btn" onclick="App.openPodcastModal()">' + icon("plus") + ' Nouveau call</button>' +
       (note ? '<div class="podcast-home-note">' + note + '</div>' : '') +
-      '</div></div>';
+      '</div></div></div>';
     renderShell(["podcasts"], body);
   }
 
-  // « Mes podcasts » : rangés comme les cours dans le Menu (matière → thème → chapitre → cours).
+  // « Mes calls » : rangés comme les cours dans le Menu (matière → thème → chapitre → cours).
   function renderPodcastLibraryPage(subjectId, themeId, chapterId) {
     var parts = ["podcasts", "lib"];
     var all = podcastVisibleList().map(function (p) { return { p: p, pl: podcastPlace(p) }; });
@@ -713,7 +709,7 @@
       if (themeTiles) content += '<div class="podcast-lib-section"><div class="podcast-lib-label">Thèmes</div><div class="card-grid-signs-short">' + themeTiles + '</div></div>';
       content += podcastLibSection("Cours supprimés ou déplacés", pick(function (pl) { return pl.subjectId === s.id && !pl.themeId; }));
     } else {
-      title = "Mes podcasts"; sub = podcastCountLabel(all.map(function (x) { return x.p; }));
+      title = "Mes calls"; sub = podcastCountLabel(all.map(function (x) { return x.p; }));
       var subjTiles = userData().subjects.map(function (sj) {
         var items = pick(function (pl) { return pl.subjectId === sj.id; });
         return items.length ? podcastLibFolderTile("#/podcasts/lib/" + sj.id, icon("book"), sj.name, items) : "";
@@ -722,17 +718,17 @@
       content += podcastLibSection("Matières supprimées", pick(function (pl) { return !pl.subjectId; }));
     }
     if (!content) {
-      content = '<div class="empty-state">' + sprite("dinoBig", 5, { bob: true }) + '<h3>Aucun podcast ici</h3><p>Crée un podcast sur un thème, un chapitre ou un seul cours : il sera rangé ici automatiquement.</p>' +
-        '<button class="btn btn-primary" style="width:auto;margin-top:14px" onclick="App.openPodcastModal()">' + icon("plus") + ' Nouveau podcast</button></div>';
+      content = '<div class="empty-state">' + sprite("dinoBig", 5, { bob: true }) + '<h3>Aucun call ici</h3><p>Crée un call sur un thème, un chapitre ou un seul cours : il sera rangé ici automatiquement.</p>' +
+        '<button class="btn btn-primary" style="width:auto;margin-top:14px" onclick="App.openPodcastModal()">' + icon("plus") + ' Nouveau call</button></div>';
     }
     var head = '<div class="page-head"><div><div class="page-title-row"><img class="page-title-logo" src="assets/objects/ui/Podcast.png" alt=""><h1 class="page-title">' + esc(title) + '</h1></div><p class="page-sub">' + sub + '</p></div>' +
-      '<button class="btn btn-primary" style="width:auto" onclick="App.openPodcastModal()">' + icon("plus") + ' Nouveau podcast</button></div>';
+      '<button class="btn btn-primary" style="width:auto" onclick="App.openPodcastModal()">' + icon("plus") + ' Nouveau call</button></div>';
     renderShell(parts, head + content);
   }
   function renderPodcastDetailPage(id) {
     var pod = podcastFind(id);
     if (!pod) { navigate("#/podcasts"); return; }
-    var closeBtn = '<button class="podcast-fs-close" onclick="location.hash=\'' + podcastLibHash(pod) + '\'" title="Retour à mes podcasts">✕</button>';
+    var closeBtn = '<button class="podcast-fs-close" onclick="location.hash=\'' + podcastLibHash(pod) + '\'" title="Retour à mes calls">✕</button>';
     var body;
     if (pod.status === "processing") {
       var procStart = pod.processingStartedAt || pod.createdAt || Date.now();
@@ -743,28 +739,26 @@
       // ce qui prend plus longtemps qu'un seul appel mais évite la troncature silencieuse — ça vaut le
       // coup d'attendre un peu plus pour avoir l'intégralité de la partie, pas un podcast coupé net.
       var procLabel = pod.script
-        ? "Le vieux conteur enregistre sa voix pour « " + pod.title + " », morceau par morceau pour ne rien couper… généralement 3 à 8 minutes par partie."
+        ? bestieOfPod(pod).name + " prépare son appel pour « " + pod.title + " », morceau par morceau pour ne rien couper… généralement 3 à 8 minutes par partie."
         : pod.pendingReplace
-        ?"Le vieux conteur refait tout le podcast « " + pod.scopeName + " » avec tes cours à jour… généralement 1 à 3 minutes pour le texte. Ton ancien podcast reste disponible jusqu'à ce que le nouveau texte soit prêt."
-        : "Le vieux conteur prépare son texte sur « " + pod.title + " »… généralement 1 à 3 minutes, un peu plus pour un cours très riche en plusieurs parties.";
+        ?bestieOfPod(pod).name + " refait tout l'appel « " + pod.scopeName + " » avec tes cours à jour… généralement 1 à 3 minutes pour le texte. Ton ancien appel reste disponible jusqu'à ce que le nouveau texte soit prêt."
+        : bestieOfPod(pod).name + " rassemble tous les gossips sur « " + pod.title + " »… généralement 1 à 3 minutes, un peu plus pour un cours très riche en plusieurs parties.";
       body = '<div class="podcast-fullscreen">' + closeBtn +
-        '<img src="' + PODCAST_DIR + PODCAST_LIS_IMG + '" class="podcast-bg-img" alt="">' +
-        '<div class="podcast-fs-bottom"><div class="processing-box" style="color:#fff">' + genLogo() + '<span>' + esc(procLabel) + '</span>' + genProgressHtml(pod.id, "", true) +
+        '<div class="call-wrap">' + bestiePhoneHtml("ring", bestieOfPod(pod)) +
+        '<div class="call-side"><div class="processing-box" style="color:#fff">' + genLogo() + '<span>' + esc(procLabel) + '</span>' + genProgressHtml(pod.id, "", true) +
         '<div class="mono" id="podcast-processing-timer" style="margin-top:8px;opacity:0.85">⏱️ ' + dpFormatCountdown(Date.now() - procStart) + '</div>' +
         '</div></div>' +
-        '</div>';
+        '</div></div>';
     } else if (pod.status === "error") {
       body = '<div class="podcast-fullscreen">' + closeBtn +
-        '<img src="' + PODCAST_DIR + PODCAST_LIS_IMG + '" class="podcast-bg-img" alt="">' +
-        '<div class="podcast-fs-bottom"><div class="processing-box" style="color:#fff"><span>⚠️ ' + esc(pod.error || "La génération a échoué.") + '</span>' +
+        '<div class="call-wrap">' + bestiePhoneHtml("error", bestieOfPod(pod)) +
+        '<div class="call-side"><div class="processing-box" style="color:#fff"><span>⚠️ ' + esc(pod.error || "La génération a échoué.") + '</span>' +
         '<div style="display:flex;gap:10px">' +
         (pod.errorDetail ? '<button class="btn btn-ghost btn-sm" style="width:auto;margin-top:14px" onclick="App.openPodcastErrorDetail(\'' + pod.id + '\')">Détails</button>' : '') +
         '<button class="btn btn-primary" style="width:auto;margin-top:14px" onclick="App.retryPodcastGeneration(\'' + pod.id + '\')">Réessayer</button>' +
-        '</div></div></div></div>';
+        '</div></div></div></div></div>';
     } else {
-      if (!(pod.id in podcastExpliqueByPod)) podcastExpliqueByPod[pod.id] = Math.floor(Math.random() * PODCAST_EXPLIQUE_IMGS.length);
       body = '<div class="podcast-fullscreen">' + closeBtn +
-        '<img id="podcast-papi-img" src="' + PODCAST_DIR + PODCAST_EXPLIQUE_IMGS[podcastExpliqueByPod[pod.id]] + '" class="podcast-bg-img" alt="">' +
         '<div class="podcast-fs-header"><button class="mobile-nav-toggle" style="background:rgba(255,255,255,0.14);border-color:rgba(255,255,255,0.4);color:#fff" onclick="App.toggleMobileNav()" aria-label="Menu">☰</button><div class="podcast-fs-title">' + esc(pod.title) + (pod.partCount > 1 ? ' · Partie ' + pod.partIndex + '/' + pod.partCount : "") + '</div>' +
         '<button class="btn btn-ghost btn-sm" style="width:auto;margin-left:auto;background:rgba(255,255,255,0.14);border-color:rgba(255,255,255,0.4);color:#fff" ' + mp3ButtonAttrs("p:" + pod.id, "⬇️ MP3") + ' onclick="App.downloadPodcastMp3(\'' + pod.id + '\')" title="Télécharger cette partie en MP3">' + mp3ButtonInner("p:" + pod.id, "⬇️ MP3") + '</button>' +
         (pod.partCount > 1 ? '<button class="btn btn-ghost btn-sm" style="width:auto;background:rgba(255,255,255,0.14);border-color:rgba(255,255,255,0.4);color:#fff" ' + mp3ButtonAttrs("g:" + pod.groupId, "⬇️ Tout en 1 MP3") + ' onclick="App.downloadPodcastGroupMp3(\'' + pod.groupId + '\')" title="Télécharger toutes les parties en un seul MP3">' + mp3ButtonInner("g:" + pod.groupId, "⬇️ Tout en 1 MP3") + '</button>' : "") +
@@ -773,12 +767,12 @@
           var refreshHtml = podcastRefreshStatusHtml(gid);
           if (refreshHtml) return '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">' + refreshHtml + '</div>';
           var hasNew = podcastGroupHasNewContent(podcastGroupParts(gid));
-          return '<button class="btn btn-ghost btn-sm" style="width:auto;background:' + (hasNew ? "rgba(255,200,60,0.35)" : "rgba(255,255,255,0.14)") + ';border-color:rgba(255,255,255,0.4);color:#fff" onclick="App.refreshPodcast(\'' + gid + '\')" title="Refait tout le podcast avec les cours à jour (consomme autant de quota voix qu\'un nouveau podcast)">🔄 Actualiser' + (hasNew ? " (nouveau contenu)" : "") + '</button>';
+          return '<button class="btn btn-ghost btn-sm" style="width:auto;background:' + (hasNew ? "rgba(255,200,60,0.35)" : "rgba(255,255,255,0.14)") + ';border-color:rgba(255,255,255,0.4);color:#fff" onclick="App.refreshPodcast(\'' + gid + '\')" title="Refait tout le call avec les cours à jour (consomme autant de quota voix qu\'un nouveau call)">🔄 Actualiser' + (hasNew ? " (nouveau contenu)" : "") + '</button>';
         })() +
         '<button class="btn btn-ghost btn-sm" style="width:auto;background:rgba(255,255,255,0.14);border-color:rgba(255,255,255,0.4);color:#fff" onclick="App.openRenameModal(\'podcast\',null,null,null,\'' + pod.id + '\')" title="Renommer">✏️</button>' +
         '<button class="btn btn-ghost btn-sm" style="width:auto;background:rgba(255,255,255,0.14);border-color:rgba(255,255,255,0.4);color:#fff" onclick="App.askDelete(\'podcast\',null,null,null,\'' + pod.id + '\')" title="Supprimer">' + icon("trash") + '</button>' +
         '</div>' +
-        '<div class="podcast-fs-bottom">' +
+        '<div class="call-wrap">' + bestiePhoneHtml("call", bestieOfPod(pod)) + '<div class="call-side">' +
         '<div id="podcast-subtitle" class="podcast-subtitle">' + (pod.segments && pod.segments[0] ? esc(pod.segments[0].text) : "") + '</div>' +
         '<audio id="podcast-audio" src="' + pod.audioUrl + '" preload="metadata" ' +
         'onplay="document.getElementById(\'podcast-play-icon\').textContent=\'⏸\'" ' +
@@ -796,7 +790,7 @@
           return '<button class="podcast-rate-btn' + (r === podcastRate ? ' active' : '') + '" data-rate="' + r + '" onclick="App.setPodcastRate(' + r + ')">' + podcastRateLabel(r) + '</button>';
         }).join("") + '</div>' +
         '</div>' +
-        '</div></div>';
+        '</div></div></div>';
     }
     renderShell(["podcasts", id], body);
     if (pod.status === "ready") {
@@ -830,7 +824,6 @@
   // lecteur n'est plus affiché (navigation vers une autre page).
   function podcastEnsurePlayerInterval() {
     if (podcastPlayerInterval) return;
-    var lastImgSwitch = Date.now();
     podcastPlayerInterval = setInterval(function () {
       var a = document.getElementById("podcast-audio");
       if (!a) { clearInterval(podcastPlayerInterval); podcastPlayerInterval = null; return; }
@@ -855,13 +848,6 @@
           if (!seg) seg = pod.segments[0];
         }
         if (seg) subEl.textContent = seg.text;
-      }
-      if (Date.now() - lastImgSwitch > 60000) {
-        lastImgSwitch = Date.now();
-        var nextIdx = (podcastExpliqueByPod[pod.id] + 1) % PODCAST_EXPLIQUE_IMGS.length;
-        podcastExpliqueByPod[pod.id] = nextIdx;
-        var imgEl = document.getElementById("podcast-papi-img");
-        if (imgEl) imgEl.src = PODCAST_DIR + PODCAST_EXPLIQUE_IMGS[nextIdx];
       }
     }, 400);
   }
@@ -903,7 +889,7 @@
 
   function renderMethodologyListPage() {
     var list = methodoData().slice().sort(function (a, b) { return b.createdAt - a.createdAt; });
-    var head = '<div class="page-head"><div><div class="page-title-row"><img class="page-title-logo" src="assets/objects/ui/Méthodologie.png" alt=""><h1 class="page-title">Méthodologie</h1></div><p class="page-sub">Les méthodes données par tes profs (dissertation, commentaire, étude de document...) — Studino génère des sujets à rédiger dessus, pas du quiz sur la méthode.</p></div>' +
+    var head = '<div class="page-head"><div><div class="page-title-row"><img class="page-title-logo" src="assets/objects/ui/Méthodologie.png" alt=""><h1 class="page-title">Méthodologie</h1></div><p class="page-sub">Les méthodes données par tes profs (dissertation, commentaire, étude de document...) — Bestie Study génère des sujets à rédiger dessus, pas du quiz sur la méthode.</p></div>' +
       '<button class="btn btn-primary" style="width:auto" onclick="App.openModal(\'methodologie\')">' + icon("plus") + ' Ajouter une méthodologie</button></div>';
     var grid;
     if (!list.length) {
@@ -1092,7 +1078,7 @@
       '<button class="btn btn-metal" style="width:auto" onclick="App.openExamPrepModal()">' + icon("plus") + ' Nouvelle prépa</button></div>';
     var grid;
     if (!list.length) {
-      grid = '<div class="empty-state">' + sprite("dinoBig", 5, { bob: true }) + '<h3>Aucune prépa en cours</h3><p>Indique la date de ton prochain examen : Studino te prépare un planning de révision jour par jour.</p>' +
+      grid = '<div class="empty-state">' + sprite("dinoBig", 5, { bob: true }) + '<h3>Aucune prépa en cours</h3><p>Indique la date de ton prochain examen : Bestie Study te prépare un planning de révision jour par jour.</p>' +
         '<button class="btn btn-metal" style="width:auto;margin-top:14px" onclick="App.openExamPrepModal()">' + icon("plus") + ' Nouvelle prépa</button></div>';
     } else {
       var today = epTodayStr();
@@ -1123,7 +1109,7 @@
     var liveTimer = (s.status !== "reviewing" && !s.done) ? '<div class="ep-session-timer mono" id="ep-session-timer">⏱️ ' + dpFormatCountdown(Date.now() - s.startedAt) + '</div>' : "";
     var head = '<div class="page-head"><div><h1 class="page-title">' + esc(prep.title) + '</h1><p class="page-sub">Entraînement du ' + esc(epFormatDateFr(s.date)) + '</p></div>' + liveTimer + '</div>';
     if (s.status === "reviewing") {
-      renderShell(["examprep", prep.id], head + '<div class="processing-box">' + genLogo() + '<span>Studino analyse ta séance…</span></div>');
+      renderShell(["examprep", prep.id], head + '<div class="processing-box">' + genLogo() + '<span>Bestie Study analyse ta séance…</span></div>');
       return;
     }
     if (s.done) {
@@ -1153,7 +1139,7 @@
       renderShell(["examprep", prep.id], head +
         '<div class="result-hero"><div class="result-score mono">' + s.correct + '/' + s.pool.length + '</div><div class="result-total">bonnes réponses aujourd\'hui</div>' +
         (s.durationMs ? '<div class="result-total">⏱️ Temps passé : ' + dpFormatCountdown(s.durationMs) + '</div>' : '') +
-        (s.pointsEarned ? '<div class="result-total">🪙 +' + s.pointsEarned + ' pts Dino Park</div>' : '') +
+        (s.pointsEarned ? '<div class="result-total">💵 +' + s.pointsEarned + ' $</div>' : '') +
         readinessDelta +
         (s.newFlashcardsCount ? '<div class="result-total">📇 +' + s.newFlashcardsCount + ' flashcards de lacunes créées</div>' : '') + '</div>' +
         (s.readinessAfter != null ? epReadinessBarHtml(s.readinessAfter, false) : "") +
@@ -1395,7 +1381,7 @@
       try {
         res = await fetchWithTimeout(url, { method: "POST", headers: { "content-type": "application/json" }, body: body }, 45000);
       } catch (netErr) {
-        lastErr = new Error(netErr && netErr.name === "AbortError" ? "le conteur n'a pas répondu à temps" : "connexion impossible");
+        lastErr = new Error(netErr && netErr.name === "AbortError" ? "pas de réponse à temps" : "connexion impossible");
         lastErr.detail = String(netErr);
         continue;
       }
@@ -1459,61 +1445,24 @@
     }
   }
   function buildCourseChatPrompt(course, loc, history) {
-    var gender = getUserGender();
-    var genderNote = gender === "m" ? "L'élève est un garçon (formulations masculines si tu l'interpelles : \"mon grand\", \"jeune homme\")."
-      : gender === "f" ? "L'élève est une fille (formulations féminines si tu l'interpelles : \"ma grande\", \"jeune demoiselle\")."
-      : "Tu ne connais pas le genre de l'élève : interpellations neutres (\"jeune ami\", \"mon enfant\").";
     var content = "## Retranscription du cours\n" + stripFigureMarkdown(course.transcription || "") +
       (course.explanation ? "\n\n## Explication du cours\n" + stripFigureMarkdown(course.explanation) : "");
-    var convo = history.map(function (m) { return (m.role === "user" ? "ÉLÈVE : " : "CONTEUR : ") + m.text; }).join("\n\n");
-    return "Tu es le vieux conteur de Studino : un ancien professeur devenu archéologue sur le tard, chaleureux et bienveillant comme un grand-père (mais pas le grand-père de l'élève), plein d'anecdotes de terrain. Un élève te pose des questions sur SON cours, par écrit, pour mieux le comprendre.\n\n" +
+    var convo = history.map(function (m) { return (m.role === "user" ? "ÉLÈVE : " : "TOI : ") + m.text; }).join("\n\n");
+    return bestieStyle(false) + "\n\nTa bestie t'écrit dans une appli de messages pour te poser des questions sur SON cours et mieux le comprendre. Tu réponds par messages.\n\n" +
       "Cours : « " + course.title + " » (matière : " + loc.subject.name + ", chapitre : " + loc.chapter.name + ").\n\n" +
       "Règles :\n" +
       "- Appuie-toi D'ABORD sur le cours ci-dessous : tes explications doivent être cohérentes avec lui et ne jamais le contredire.\n" +
       "- Si la question dépasse le cours (une notion, un fait ou un détail qui n'y figure pas), réponds quand même, correctement et honnêtement, MAIS signale-le clairement, par exemple « Attention, ça ce n'est pas dans ton cours : ... », pour que l'élève sache ce qui risque de tomber au contrôle et ce qui est en plus. Ne présente jamais une information hors cours comme si elle venait du cours.\n" +
-      "- Tu es un prof avant tout : explique le POURQUOI, avec des images et des exemples concrets, étape par étape pour une méthode ou un calcul. Si l'élève semble perdu, reformule plus simplement. Si sa question contient une erreur, corrige-la gentiment.\n" +
+      "- Même en mode gossip, tu expliques super bien : explique le POURQUOI, avec des images et des exemples concrets, étape par étape pour une méthode ou un calcul. Si l'élève semble perdu, reformule plus simplement. Si sa question contient une erreur, corrige-la gentiment.\n" +
       "- Réponds de façon vivante mais CONCISE : ce qui est utile pour répondre à la question, pas un nouveau cours entier (sauf s'il le demande). Paragraphes courts, listes si utile.\n" +
       "- S'il te demande de l'interroger : pose UNE question à la fois sur le cours, attends sa réponse, puis corrige-la (ce qui est juste, ce qui manque) avant la question suivante.\n" +
-      "- " + genderNote + "\n" +
+      "- FORMAT MESSAGERIE : envoie 1 à 5 messages courts à la suite, comme dans une vraie conversation, séparés par ||| (trois barres, seules entre deux messages). Un tableau, une liste ou un calcul reste entier dans un seul message.\n" +
       "- LANGUE : si le cours est entièrement dans une langue étrangère (anglais, espagnol, japonais...), réponds dans cette langue avec des phrases simples (l'élève doit maîtriser le cours dans cette langue), sauf s'il te demande explicitement une explication en français. Si le cours mélange français et langue étrangère, réponds en français en citant les mots et expressions dans la langue étrangère. Sinon, en français.\n" +
       "- DESSINS : l'élève peut t'envoyer des dessins faits avec l'outil Dessin (images jointes, repérées dans la conversation). Regarde-les vraiment : explique ce qui est juste, ce qui est faux ou manque (éléments, légendes, flèches), et comment l'améliorer. Tu peux aussi lui demander de faire un schéma quand ça l'aide à apprendre.\n" +
       "- Formules en LaTeX entre $...$ (ou $$...$$ isolée), jamais de commande de couleur. Markdown simple autorisé (gras, listes, tableaux).\n\n" +
       "Voici le cours :\n\n" + content + "\n\n" +
       "Conversation jusqu'ici (le dernier message est celui auquel tu dois répondre maintenant) :\n\n" + convo + "\n\n" +
       "Réponds directement par ton message au dernier message de l'élève (Markdown simple), sans préambule ni balise.";
-  }
-  function courseChatHtml(course) {
-    if (course.status !== "ready") return "";
-    var msgs = course.chat || [];
-    var avatar = PODCAST_DIR + "PapiAvatar.png";
-    if (!courseChatOpen[course.id]) {
-      // Bouton flottant, toujours visible en bas de l'écran : pas besoin de descendre tout en bas du cours.
-      return '<button class="course-chat-fab" onclick="App.openCourseChat(\'' + course.id + '\')" title="Pose tes questions sur ce cours au vieux conteur"><img src="' + avatar + '" alt=""><span>💬 ' + (msgs.length ? "Reprendre la conversation" : "Parler au vieux conteur") + '</span></button>';
-    }
-    var pending = !!courseChatPending[course.id];
-    var dis = pending ? " disabled" : "";
-    // Même éditeur que dans « Mes exos » (LaTeX, tableaux, tableau périodique, mise en forme). Ce qui est
-    // déjà tapé est relu dans la page juste avant de la redessiner, pour ne jamais le perdre.
-    var liveBox = document.getElementById("course-chat");
-    var liveEditor = document.getElementById("course-chat-input");
-    if (liveEditor && liveBox && liveBox.getAttribute("data-course") === course.id) courseChatDraft[course.id] = liveEditor.innerHTML;
-    var chatEditor = richEditorHtml("course-chat-input", "Pose ta question…", sanitizeRichHtml(courseChatDraft[course.id] || ""))
-      .replace('contenteditable="true"', 'contenteditable="' + (pending ? "false" : "true") + '" onkeydown="if(event.key===\'Enter\'&&(event.ctrlKey||event.metaKey)){event.preventDefault();App.sendCourseChat(\'' + course.id + '\')}"');
-    var listHtml = msgs.length ? msgs.map(function (m) {
-      return m.role === "user"
-        ? '<div class="chat-msg chat-msg-user">' + (m.html ? '<div class="rte-display">' + sanitizeRichHtml(m.html) + '</div>' : esc(m.text).replace(/\n/g, "<br>")) + '</div>'
-        : '<div class="chat-msg chat-msg-bot"><img src="' + avatar + '" alt=""><div class="chat-msg-body prose">' + mdToHtml(m.text, course.figures) + '</div></div>';
-    }).join("") : '<div class="chat-msg chat-msg-bot"><img src="' + avatar + '" alt=""><div class="chat-msg-body">Ah, te voilà ! Pose-moi n\'importe quelle question sur « ' + esc(course.title) + ' », je t\'explique tout ça.</div></div>';
-    if (pending) listHtml += (courseChatStream[course.id] ? '<div class="chat-msg chat-msg-bot"><img src="' + avatar + '" alt=""><div class="chat-msg-body prose" id="course-chat-stream">' + mdToHtml(courseChatStream[course.id], course.figures) + '</div></div>' : '<div class="chat-msg chat-msg-bot"><img src="' + avatar + '" alt=""><div class="chat-msg-body chat-typing" id="course-chat-stream"><span class="dotpulse"></span> Le conteur réfléchit…</div></div>');
-    return '<div class="course-chat' + (courseChatBig ? " course-chat-big" : "") + '" id="course-chat" data-course="' + course.id + '">' +
-      '<div class="course-chat-head"><img src="' + avatar + '" alt=""><div style="flex:1;font-weight:700">Le vieux conteur</div>' +
-      (msgs.length ? '<button class="btn btn-ghost btn-sm" style="width:auto"' + dis + ' onclick="App.resetCourseChat(\'' + course.id + '\')">🗑 Nouvelle conversation</button>' : "") +
-      '<button class="btn btn-ghost btn-sm" style="width:auto" data-chat-size onclick="App.toggleCourseChatSize()" title="' + (courseChatBig ? "Réduire la fenêtre" : "Agrandir la fenêtre") + '">' + (courseChatBig ? "⤡ Réduire" : "⤢ Agrandir") + '</button>' +
-      '<button class="btn btn-ghost btn-sm" style="width:auto" onclick="App.closeCourseChat(\'' + course.id + '\')" title="Fermer le chat">✕</button></div>' +
-      '<div class="course-chat-list" id="course-chat-list">' + listHtml + '</div>' +
-      '<div class="course-chat-form">' + chatEditor +
-      '<div class="course-chat-send"><span class="course-chat-hint">Ctrl + Entrée pour envoyer</span><button type="button" class="btn btn-primary" style="width:auto"' + dis + ' onclick="App.sendCourseChat(\'' + course.id + '\')">Envoyer</button></div></div>' +
-      '</div>';
   }
   function renderCoursePage(courseId, tab) {
     var loc = locateCourse(courseId);

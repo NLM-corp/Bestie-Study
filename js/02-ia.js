@@ -1,5 +1,5 @@
 "use strict";
-// Studino — appels à l'IA, retranscription, pourcentages
+// Bestie Study — appels à l'IA, retranscription, pourcentages
 // Fichier chargé dans l'ordre par index.html : les fichiers partagent les mêmes variables globales.
 
   /* ---------------- Gemini AI generation ---------------- */
@@ -31,7 +31,7 @@
   function getUserGender() { return localStorage.getItem(USER_GENDER_STORAGE) || ""; }
   function setUserGender(g) { if (["m", "f", "autre"].indexOf(g) !== -1) localStorage.setItem(USER_GENDER_STORAGE, g); else localStorage.removeItem(USER_GENDER_STORAGE); }
 
-  // Rappel de révision : limite honnête, Studino est un site statique sans serveur de notifications
+  // Rappel de révision : limite honnête, Bestie Study est un site statique sans serveur de notifications
   // push — ça ne peut donc prévenir que si l'onglet est rouvert/déjà ouvert (un simple check au
   // démarrage), jamais en vrai arrière-plan comme une appli mobile. Mieux que rien, pas une vraie alarme.
   var REMINDER_STORAGE = "bestie_reminder_enabled";
@@ -47,7 +47,7 @@
     });
     if (!pending) return;
     localStorage.setItem(REMINDER_LAST_NOTIF_STORAGE, today);
-    try { new Notification("Studino", { body: "Ta session de révision du jour t'attend sur Mission Contrôle 🦖" }); } catch (e) {}
+    try { new Notification("Bestie Study", { body: "Ta session de révision du jour t'attend sur Mission Contrôle 🦖" }); } catch (e) {}
   }
 
   // Un exercice/question qui renvoie à un support visuel (figure géométrique, graphique, spectre,

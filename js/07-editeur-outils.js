@@ -1,5 +1,5 @@
 "use strict";
-// Studino — éditeur, LaTeX, dessin, graphique, PDF, flashcards, quiz
+// Bestie Study — éditeur, LaTeX, dessin, graphique, PDF, flashcards, quiz
 // Fichier chargé dans l'ordre par index.html : les fichiers partagent les mêmes variables globales.
 
   /* ---------------- Rich text mini-editor ---------------- */
@@ -910,7 +910,7 @@
   // cette page imprimée : aucune dépendance à var()/calc(), donc aucune ambiguïté possible. Partagé par
   // toutes les "fiches" imprimables (révision, méthodologie...) pour un même réglage de zoom partout.
   function ficheHueAndScaleStyle() {
-    var hue = document.documentElement.getAttribute("data-app-color") || "vert";
+    var hue = document.documentElement.getAttribute("data-app-color") || "rose";
     var hc = PRINT_HUE_COLORS[hue] || PRINT_HUE_COLORS.vert;
     var hueStyle = 'style="--fiche-accent:' + hc.accent + ';--fiche-strong:' + hc.strong + ';--fiche-soft:' + hc.soft + '"';
     var scale = getPrintScale();
@@ -957,7 +957,7 @@
   }
   // Le nom de fichier suggéré par "Imprimer > Enregistrer en PDF" du navigateur vient du <title> de la
   // page, pas du contenu affiché — sans ça, tout export (fiche, cours, exercice...) se sauvegardait sous
-  // le même nom générique "Studino" quel que soit son contenu réel. On change temporairement le titre de
+  // le même nom générique "Bestie Study" quel que soit son contenu réel. On change temporairement le titre de
   // la page le temps de l'impression, puis on le restaure une fois la boîte de dialogue fermée.
   function printAndDownload(html, filename) {
     var area = document.getElementById("print-area");

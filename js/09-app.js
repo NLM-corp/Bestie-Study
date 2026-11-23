@@ -1,5 +1,5 @@
 "use strict";
-// Studino — contrôleur App (actions des boutons)
+// Bestie Study — contrôleur App (actions des boutons)
 // Fichier chargé dans l'ordre par index.html : les fichiers partagent les mêmes variables globales.
 
   /* ---------------- App controller ---------------- */
@@ -536,14 +536,14 @@
     refreshPodcast: function (gid) {
       var parts = podcastGroupParts(gid).filter(function (p) { return !p.pendingReplace; });
       if (!parts.length) return;
-      if (parts.some(function (p) { return p.status === "processing"; })) { toast("Attends que la génération en cours de ce podcast soit terminée."); return; }
-      if (podcastPendingFor(gid).length) { toast("Une actualisation de ce podcast est déjà en cours."); return; }
+      if (parts.some(function (p) { return p.status === "processing"; })) { toast("Attends que la génération en cours de ce call soit terminée."); return; }
+      if (podcastPendingFor(gid).length) { toast("Une actualisation de ce call est déjà en cours."); return; }
       if (!getApiKey()) { toast("Ajoute d'abord ta clé API dans les paramètres"); App.openApiKeyModal(); return; }
       var ch = podcastGroupChanges(parts);
-      if (ch.known && !ch.added.length && !ch.modified.length) { toast("Aucun cours ajouté ou modifié depuis ce podcast — il est déjà à jour."); return; }
+      if (ch.known && !ch.added.length && !ch.modified.length) { toast("Aucun cours ajouté ou modifié depuis ce call — il est déjà à jour."); return; }
       var first = parts[0];
       var subj = findSubject(first.subjectId);
-      if (!subj) { toast("La matière de ce podcast n'existe plus."); return; }
+      if (!subj) { toast("La matière de ce call n'existe plus."); return; }
       var content = podcastScopeContentText(subj, first.scopeLevel, first.scopeId);
       if (!content) { toast(first.scopeLevel === "course" ? "Ce cours n'existe plus ou n'est plus généré." : "Ce " + podcastScopeLabel(first.scopeLevel) + " n'a plus aucun cours généré."); return; }
       var pod = {
@@ -557,7 +557,7 @@
       };
       podcastData().push(pod);
       saveDB();
-      toast("Actualisation lancée — tu peux continuer à écouter l'ancien podcast, il sera remplacé une fois le nouveau entièrement prêt.");
+      toast("Actualisation lancée — tu peux continuer à écouter l'ancien call, il sera remplacé une fois le nouveau entièrement prêt.");
       runPodcastGeneration(pod, subj.name, first.scopeName, content);
     },
     // Reprend une actualisation interrompue : voix manquantes (texte déjà là) une par une, ou texte
@@ -570,7 +570,7 @@
       var first = pending[0];
       if (!first.script) {
         var subj = findSubject(first.subjectId);
-        if (!subj) { toast("La matière de ce podcast n'existe plus."); return; }
+        if (!subj) { toast("La matière de ce call n'existe plus."); return; }
         var content = podcastScopeContentText(subj, first.scopeLevel, first.scopeId);
         runPodcastGeneration(first, subj.name, first.scopeName, content);
         return;
@@ -584,7 +584,7 @@
       var d = userData();
       d.podcasts = d.podcasts.filter(function (p) { return p.pendingReplace !== oldGid; });
       saveDB();
-      toast("Actualisation annulée — ton podcast actuel est conservé.");
+      toast("Actualisation annulée — ton call actuel est conservé.");
       render();
     },
     // Fin de l'audio d'une partie : si une partie suivante existe déjà et est prête, enchaîne
@@ -711,13 +711,14 @@
       var box = document.getElementById("course-chat");
       if (box) box.classList.toggle("course-chat-big", courseChatBig);
       var btn = box && box.querySelector("[data-chat-size]");
-      if (btn) { btn.textContent = courseChatBig ? "⤡ Réduire" : "⤢ Agrandir"; btn.title = courseChatBig ? "Réduire la fenêtre" : "Agrandir la fenêtre"; }
+      if (btn) { btn.textContent = courseChatBig ? "⤡" : "⤢"; btn.title = courseChatBig ? "Réduire la fenêtre" : "Agrandir la fenêtre"; }
     },
     setCourseChatDraft: function (courseId, value) { courseChatDraft[courseId] = value; },
     resetCourseChat: function (courseId) {
       var loc = locateCourse(courseId);
       if (!loc || courseChatPending[courseId]) return;
-      loc.course.chat = [];
+      var bid = bestie().id;
+      loc.course.chat = (loc.course.chat || []).filter(function (m) { return (m.bestie || bid) !== bid; });
       saveDB();
       courseChatScrollIntoView = true;
       render();
@@ -732,7 +733,7 @@
       if (!getApiKey()) { toast("Ajoute d'abord ta clé API dans les paramètres"); App.openApiKeyModal(); return; }
       var course = loc.course;
       course.chat = course.chat || [];
-      var msg = { role: "user", text: text, html: rteValue("course-chat-input"), at: Date.now() };
+      var msg = { role: "user", text: text, html: rteValue("course-chat-input"), at: Date.now(), bestie: bestie().id };
       courseChatDraft[courseId] = "";
       var ed = document.getElementById("course-chat-input");
       if (ed) ed.innerHTML = "";
@@ -741,7 +742,8 @@
       courseChatScrollIntoView = true;
       saveDB(); render();
       // Les 20 derniers messages suffisent comme contexte (le cours, lui, part en entier à chaque fois).
-      var history = course.chat.slice(-20);
+      var bid = msg.bestie;
+      var history = bestieMsgs(course).slice(-20);
       courseChatStream[courseId] = "";
       // La réponse s'affiche au fur et à mesure qu'elle s'écrit (mise à jour directe de la bulle, sans
       // redessiner toute la page), au plus une fois par image pour rester fluide.
@@ -756,8 +758,7 @@
           var list = document.getElementById("course-chat-list");
           if (!bubble || !list) return;
           var nearBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 80;
-          bubble.className = "chat-msg-body prose";
-          bubble.innerHTML = mdToHtml(courseChatStream[courseId] || "", course.figures);
+          bubble.innerHTML = bestieBubbles(courseChatStream[courseId] || "", course) || bestieTyping();
           if (nearBottom) list.scrollTop = list.scrollHeight;
         });
       };
@@ -766,13 +767,13 @@
       var chatParts = chatDrawn.images.length ? drawingParts(chatDrawn.images).concat([{ text: chatDrawn.text }]) : chatDrawn.text;
       streamCourseChatReply(chatParts, onText).then(function (reply) {
         reply = String(reply || "").trim();
-        course.chat.push({ role: "model", text: reply || "Hmm… je n'ai pas su quoi répondre, repose-moi ta question autrement.", at: Date.now() });
+        course.chat.push({ role: "model", text: reply || "Attends j'ai buggé 💀 redis-moi ça autrement ?", at: Date.now(), bestie: bid });
       }).catch(function (err) {
         // Coupure en plein milieu : on garde ce qui a déjà été écrit plutôt que de tout perdre.
         var partial = String(courseChatStream[courseId] || "").trim();
         course.chat.push(partial
-          ? { role: "model", text: partial + "\n\n*(réponse coupée, repose ta question si besoin)*", at: Date.now() }
-          : { role: "model", text: "⚠️ Je n'ai pas pu te répondre (" + (err && err.message || "erreur inconnue") + "). Réessaie dans un instant.", at: Date.now(), error: true });
+          ? { role: "model", text: partial + "\n\n*(réponse coupée, repose ta question si besoin)*", at: Date.now(), bestie: bid }
+          : { role: "model", text: "⚠️ Je n'ai pas pu te répondre (" + (err && err.message || "erreur inconnue") + "). Réessaie dans un instant.", at: Date.now(), bestie: bid, error: true });
       }).then(function () {
         courseChatStream[courseId] = "";
         courseChatPending[courseId] = false;
@@ -1543,9 +1544,9 @@
       var reader = new FileReader();
       reader.onload = function () {
         var parsed;
-        try { parsed = JSON.parse(reader.result); } catch (err) { toast("Fichier invalide — ce n'est pas une sauvegarde Studino."); return; }
+        try { parsed = JSON.parse(reader.result); } catch (err) { toast("Fichier invalide — ce n'est pas une sauvegarde Bestie Study."); return; }
         if (!parsed || typeof parsed !== "object" || typeof parsed.users !== "object" || typeof parsed.data !== "object") {
-          toast("Fichier invalide — ce n'est pas une sauvegarde Studino.");
+          toast("Fichier invalide — ce n'est pas une sauvegarde Bestie Study.");
           return;
         }
         // Remplacer DB tout de suite écraserait les données actuelles sans confirmation si l'import
@@ -1698,12 +1699,12 @@
         var d6 = userData();
         d6.podcasts = d6.podcasts.filter(function (x) { return x.id !== m.courseId; });
         setTimeout(gcPodcastAudio, 0);
-        toast("Podcast supprimé");
+        toast("Call supprimé");
       } else if (m.kind === "podcastGroup") {
         var d7 = userData();
         d7.podcasts = d7.podcasts.filter(function (x) { return x.groupId !== m.courseId; });
         setTimeout(gcPodcastAudio, 0);
-        toast("Podcast supprimé");
+        toast("Call supprimé");
       }
       saveDB();
       modal = null;
@@ -1830,7 +1831,7 @@
     dpUnlockZone: function (zoneId) {
       var dp = dpData(); var z = dpZone(zoneId);
       if (!dpZoneFullyStocked(zoneId)) { toast("Cette zone n'est pas encore disponible"); return; }
-      if (dp.points < z.cost) { toast("Pas assez de points"); return; }
+      if (dp.points < z.cost) { toast("Pas assez de dollars"); return; }
       dp.points -= z.cost; dp.unlockedZones.push(zoneId);
       saveDB(); toast("Zone " + z.name + " débloquée !"); render();
     },
@@ -1839,7 +1840,7 @@
       var shop = dpShop(zoneId);
       if (typeof idx === "number" && shop.sold && shop.sold[idx]) { toast("Cette caisse est déjà vide"); return; }
       if (!dpEnclosuresInZone(zoneId).length) { toast("Construis d'abord un enclos dans cette zone"); return; }
-      if (dp.points < rarity.price) { dpPlayMerchantSound("noCash"); toast("Pas assez de points"); return; }
+      if (dp.points < rarity.price) { dpPlayMerchantSound("noCash"); toast("Pas assez de dollars"); return; }
       dp.points -= rarity.price; dp.eggs.push({ id: uid(), speciesId: speciesId });
       // la caisse reste sur le comptoir, vide, jusqu'au prochain réassort du vendeur
       if (typeof idx === "number") { shop.sold = shop.sold || []; shop.sold[idx] = true; }
@@ -1847,7 +1848,7 @@
     },
     dpBuildEnclosure: function (zoneId) {
       var dp = dpData(); var cost = dpZoneEnclosureCost(zoneId);
-      if (dp.points < cost) { dpPlayMerchantSound("noCash"); toast("Pas assez de points"); return; }
+      if (dp.points < cost) { dpPlayMerchantSound("noCash"); toast("Pas assez de dollars"); return; }
       var count = dpEnclosuresInZone(zoneId).length;
       dp.points -= cost;
       dp.enclosures.push({ id: uid(), zone: zoneId, name: "Enclos " + (count + 1), capacity: 2, level: 1, variant: dpRandomEnclosureVariant(zoneId) });
@@ -1857,7 +1858,7 @@
       var dp = dpData(); var enc = dp.enclosures.find(function (e) { return e.id === encId; });
       var cost = DP_ENCLOSURE_UPGRADE_COST[enc.level];
       if (cost == null) { toast("Enclos déjà au niveau maximum"); return; }
-      if (dp.points < cost) { toast("Pas assez de points"); return; }
+      if (dp.points < cost) { toast("Pas assez de dollars"); return; }
       dp.points -= cost; enc.level += 1; enc.variant = dpRandomEnclosureVariant(enc.zone);
       saveDB(); toast("Enclos amélioré au niveau " + enc.level); render();
     },
@@ -1890,12 +1891,12 @@
       dpSellSelectedDinoId = null;
       saveDB();
       dpPlayMerchantSound("thankyou");
-      toast(d.name + " vendu · +" + sellPrice + " pts");
+      toast(d.name + " vendu · +" + sellPrice + " $");
       render();
     },
     dpRefreshShop: function (zoneId) {
       var dp = dpData();
-      if (dp.points < DP_SHOP_REFRESH_COST) { toast("Pas assez de points"); return; }
+      if (dp.points < DP_SHOP_REFRESH_COST) { toast("Pas assez de dollars"); return; }
       dp.points -= DP_SHOP_REFRESH_COST;
       dp.shops[zoneId] = { items: dpGenerateShopItems(zoneId, 0), luck: 0, expiresAt: Date.now() + DP_SHOP_DURATION };
       saveDB(); toast("Le vendeur a été rafraîchi (chance remise à " + dpLuckPercent(0) + " %)"); render();
@@ -1907,7 +1908,7 @@
       var cur = dpShopSlots(zoneId);
       if (cur >= DP_SHOP_SLOTS_MAX) { toast("Le vendeur propose déjà le maximum d'œufs"); return; }
       var cost = DP_SHOP_SLOT_UPGRADE_COST[cur + 1];
-      if (dp.points < cost) { dpPlayMerchantSound("noCash"); toast("Pas assez de points"); return; }
+      if (dp.points < cost) { dpPlayMerchantSound("noCash"); toast("Pas assez de dollars"); return; }
       dp.points -= cost;
       dp.shopSlots = dp.shopSlots || {};
       dp.shopSlots[zoneId] = cur + 1;
@@ -1921,7 +1922,7 @@
       var dp = dpData();
       var level = dpLuckLevel(dpShop(zoneId));
       if (level >= DP_LUCK_MAX) { toast("Chance déjà au maximum pour cette boutique"); return; }
-      if (dp.points < DP_SHOP_LUCK_COST) { dpPlayMerchantSound("noCash"); toast("Pas assez de points"); return; }
+      if (dp.points < DP_SHOP_LUCK_COST) { dpPlayMerchantSound("noCash"); toast("Pas assez de dollars"); return; }
       dp.points -= DP_SHOP_LUCK_COST;
       level++;
       dp.shops[zoneId] = { items: dpGenerateShopItems(zoneId, level), luck: level, expiresAt: Date.now() + DP_SHOP_DURATION };
@@ -1951,17 +1952,17 @@
     },
     dpBuyFoodCrate: function (itemId) {
       var dp = dpData(); var item = dpFoodItem(itemId);
-      if (dp.points < item.price) { dpPlayMerchantSound("noCash"); toast("Pas assez de points"); return; }
+      if (dp.points < item.price) { dpPlayMerchantSound("noCash"); toast("Pas assez de dollars"); return; }
       dp.points -= item.price;
       dp.inventory[itemId] = (dp.inventory[itemId] || 0) + DP_PORTIONS_PER_CRATE;
-      saveDB(); dpPlayMerchantSound("thankyou"); toast("+" + DP_PORTIONS_PER_CRATE + " " + item.name.toLowerCase() + " achetées (" + item.price + " pts)"); dpSyncPointsDisplay();
+      saveDB(); dpPlayMerchantSound("thankyou"); toast("+" + DP_PORTIONS_PER_CRATE + " " + item.name.toLowerCase() + " achetées (" + item.price + " $)"); dpSyncPointsDisplay();
     },
     dpBuyCareCrate: function (itemId) {
       var dp = dpData(); var item = dpMedicineItem(itemId);
-      if (dp.points < item.price) { dpPlayMerchantSound("noCash"); toast("Pas assez de points"); return; }
+      if (dp.points < item.price) { dpPlayMerchantSound("noCash"); toast("Pas assez de dollars"); return; }
       dp.points -= item.price;
       dp.inventory[itemId] = (dp.inventory[itemId] || 0) + DP_DOSES_PER_CRATE;
-      saveDB(); dpPlayMerchantSound("thankyou"); toast("+" + DP_DOSES_PER_CRATE + " " + item.name.toLowerCase() + " achetés (" + item.price + " pts)"); dpSyncPointsDisplay();
+      saveDB(); dpPlayMerchantSound("thankyou"); toast("+" + DP_DOSES_PER_CRATE + " " + item.name.toLowerCase() + " achetés (" + item.price + " $)"); dpSyncPointsDisplay();
     },
     dpFeedDino: function (dinoId, itemId) {
       var dp = dpData(); var item = dpFoodItem(itemId);

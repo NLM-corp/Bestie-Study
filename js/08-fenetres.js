@@ -1,5 +1,5 @@
 "use strict";
-// Studino — fenêtres (modales)
+// Bestie Study — fenêtres (modales)
 // Fichier chargé dans l'ordre par index.html : les fichiers partagent les mêmes variables globales.
 
   /* ---------------- Modals ---------------- */
@@ -55,7 +55,7 @@
         '</form>';
     } else if (modal.type === "methodologie") {
       inner = '<h3>Ajouter une méthodologie</h3>' +
-        '<p class="modal-warn" style="margin-bottom:14px">La méthode que ton prof t\'a donnée pour un type d\'épreuve (dissertation, commentaire, étude de document...) — pas un cours. Studino ne te fera pas réviser la méthode par cœur : elle générera des sujets d\'entraînement à rédiger, notés comme une vraie copie. Pas besoin de choisir une matière ici : la même méthode sert souvent pour plusieurs matières (ex. la dissertation en français ET en histoire) — tu choisiras la matière et le chapitre au moment de t\'entraîner.</p>' +
+        '<p class="modal-warn" style="margin-bottom:14px">La méthode que ton prof t\'a donnée pour un type d\'épreuve (dissertation, commentaire, étude de document...) — pas un cours. Bestie Study ne te fera pas réviser la méthode par cœur : elle générera des sujets d\'entraînement à rédiger, notés comme une vraie copie. Pas besoin de choisir une matière ici : la même méthode sert souvent pour plusieurs matières (ex. la dissertation en français ET en histoire) — tu choisiras la matière et le chapitre au moment de t\'entraîner.</p>' +
         '<form onsubmit="App.createMethodology(event)">' +
         '<div class="field"><label>Photos ou PDF de la méthodologie <span style="font-weight:400;color:var(--text-muted)">(optionnel)</span></label>' +
         '<div class="file-thumbs">' +
@@ -91,23 +91,23 @@
         return '<button type="button" class="btn btn-sm ' + (ppLevel === level ? "btn-primary" : "btn-ghost") + '" style="width:auto" onclick="App.setPodcastLevel(\'' + level + '\')">' + label + '</button>';
       };
       var ppHasAny = ppThemes.length > 0;
-      inner = '<h3>🎙️ Nouveau podcast</h3>' +
-        '<p class="modal-warn" style="margin-bottom:14px">Le vieux conteur raconte la portée choisie, fidèlement et en entier — pas une récitation, un vrai récit.</p>' +
+      inner = '<h3>📞 Nouveau call</h3>' +
+        '<p class="modal-warn" style="margin-bottom:14px">' + bestie().name + ' t\'appelle pour tout te raconter façon gossip, en entier et sans rien inventer.</p>' +
         (ppSubs.length ? (
           '<div class="field"><label>Matière</label><select onchange="App.changePodcastSubject(this.value)">' + ppSubjOptions + '</select></div>' +
           '<div class="field"><label>Portée</label><div style="display:flex;gap:8px;flex-wrap:wrap">' +
           ppLevelBtn("theme", "Tout un thème") + ppLevelBtn("chapter", "Un chapitre") + ppLevelBtn("course", "Un seul cours") +
           '</div></div>' +
-          '<div class="field"><label>Langue du podcast</label><select onchange="App.setPodcastLangMode(this.value)">' +
+          '<div class="field"><label>Langue du call</label><select onchange="App.setPodcastLangMode(this.value)">' +
           PODCAST_LANG_MODES.map(function (lm) { return '<option value="' + lm[0] + '" ' + ((modal.langMode || "auto") === lm[0] ? "selected" : "") + '>' + lm[1] + '</option>'; }).join("") +
           '</select><p style="font-size:12px;color:var(--text-muted);margin:6px 0 0">' + PODCAST_LANG_HINTS[modal.langMode || "auto"] + '</p></div>' +
           (ppHasAny ? (
             '<div class="field"><label>Thème</label><select onchange="App.changePodcastTheme(this.value)">' + ppOptions(ppThemes, modal.themeId, "name") + '</select></div>' +
             (ppLevel !== "theme" ? '<div class="field"><label>Chapitre</label><select onchange="App.changePodcastChapter(this.value)">' + ppOptions(ppChapters, modal.chapterId, "name") + '</select></div>' : "") +
             (ppLevel === "course" ? '<div class="field"><label>Cours</label><select onchange="App.changePodcastCourse(this.value)">' + ppOptions(ppCourses, modal.courseId, "title") + '</select></div>' : "") +
-            '<p style="font-size:12px;color:var(--text-muted);margin:-4px 0 14px">Le vieux conteur décide lui-même s\'il faut une ou plusieurs parties, selon la quantité réelle de contenu à couvrir.</p>' +
+            '<p style="font-size:12px;color:var(--text-muted);margin:-4px 0 14px">' + bestie().name + ' décide elle-même s\'il faut une ou plusieurs parties, selon la quantité réelle de contenu à couvrir.</p>' +
             '<div class="modal-actions"><button type="button" class="btn btn-ghost" onclick="App.closeModal()">Annuler</button><button type="button" class="btn btn-primary" onclick="App.createPodcast()">Générer</button></div>'
-          ) : '<p class="modal-warn">Cette matière n\'a encore aucun cours généré — génère au moins un cours avant de créer un podcast.</p>')
+          ) : '<p class="modal-warn">Cette matière n\'a encore aucun cours généré — génère au moins un cours avant de créer un call.</p>')
         ) : '<p class="modal-warn">Crée d\'abord une matière avec au moins un cours généré.</p>');
     } else if (modal.type === "addCourseDocs") {
       inner = '<h3>Ajouter des documents</h3>' +
@@ -255,7 +255,7 @@
         '</div>';
     } else if (modal.type === "exercice") {
       inner = '<h3>Importer un exercice</h3>' +
-        '<p class="modal-warn" style="margin-bottom:14px">Ton propre exercice, dans n\'importe quelle matière — corrigé par l\'IA, mais ne rapporte pas de points Dino Park.</p>' +
+        '<p class="modal-warn" style="margin-bottom:14px">Ton propre exercice, dans n\'importe quelle matière — corrigé par l\'IA, mais ne rapporte pas de dollars.</p>' +
         '<form onsubmit="App.createImportedExercise(event)">' +
         '<div class="field"><label>Photos ou PDF de l\'exercice</label>' +
         '<div class="file-thumbs">' +
@@ -313,7 +313,7 @@
       } else if (modal.kind === "podcastGroup") {
         var dgrp = podcastData().filter(function (x) { return x.groupId === modal.courseId; });
         name = dgrp.length ? (dgrp[0].scopeName || dgrp[0].title) : "";
-        warn = "Les " + dgrp.length + " parties de ce podcast seront définitivement perdues.";
+        warn = "Les " + dgrp.length + " parties de ce call seront définitivement perdues.";
       }
       inner = '<h3>Supprimer « ' + esc(name) + ' » ?</h3>' +
         '<p class="modal-warn">' + warn + ' <strong>Cette action est définitive.</strong></p>' +
@@ -341,8 +341,8 @@
         '<div class="modal-actions"><button type="button" class="btn btn-ghost" onclick="App.closeModal()">Annuler</button><button type="submit" class="btn btn-primary">Enregistrer</button></div>' +
         '</form>';
     } else if (modal.type === "apiKeyGuide") {
-      inner = '<h3>🔑 Bienvenue sur Studino !</h3>' +
-        '<p class="modal-warn" style="margin-bottom:16px">Pour générer tes cours, questions et exercices, Studino a besoin d\'une clé API Gemini (Google). C\'est <strong>gratuit</strong> et ça prend 2 minutes — voici comment faire :</p>' +
+      inner = '<h3>🔑 Bienvenue sur Bestie Study !</h3>' +
+        '<p class="modal-warn" style="margin-bottom:16px">Pour générer tes cours, questions et exercices, Bestie Study a besoin d\'une clé API Gemini (Google). C\'est <strong>gratuit</strong> et ça prend 2 minutes — voici comment faire :</p>' +
         '<ol class="apikey-guide-steps">' +
         '<li>Va sur <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">aistudio.google.com/apikey</a> (Google AI Studio) et connecte-toi avec un compte Google (ou crées-en un gratuitement si tu n\'en as pas) — assure-toi qu\'aucun AUTRE compte Google n\'est connecté en même temps dans ce navigateur, sinon Google peut mélanger les permissions et bloquer.</li>' +
         '<li>Clique sur le bouton <strong>« Create API key »</strong> (« Créer une clé API »), en haut de la page.</li>' +
@@ -355,10 +355,10 @@
         '<div class="field"><label>Colle ta clé API ici</label><input name="apiKey" type="password" placeholder="AIzaSy..." autocomplete="off" autofocus></div>' +
         '<div class="modal-actions"><button type="button" class="btn btn-ghost" onclick="App.closeModal()">Plus tard</button><button type="submit" class="btn btn-primary">Enregistrer</button></div>' +
         '</form>' +
-        '<p class="modal-warn" style="margin-top:16px">💡 Conseil : une fois cette clé enregistrée, pense aussi à créer une <strong>clé de secours</strong> avec un second compte Google (dans Paramètres → Clé API de secours) — si celle-ci atteint sa limite gratuite quotidienne, Studino bascule automatiquement dessus au lieu de te bloquer.</p>';
+        '<p class="modal-warn" style="margin-top:16px">💡 Conseil : une fois cette clé enregistrée, pense aussi à créer une <strong>clé de secours</strong> avec un second compte Google (dans Paramètres → Clé API de secours) — si celle-ci atteint sa limite gratuite quotidienne, Bestie Study bascule automatiquement dessus au lieu de te bloquer.</p>';
     } else if (modal.type === "backupApiKeyGuide") {
       inner = '<h3>🔑 Clé API de secours</h3>' +
-        '<p class="modal-warn" style="margin-bottom:16px">Optionnel : une deuxième clé, créée avec un <strong>autre compte Google</strong> que ta clé principale. Si ta clé principale atteint sa limite gratuite quotidienne sur tous ses modèles, Studino bascule automatiquement sur celle-ci — un compte Google différent a un quota totalement indépendant. Même méthode que pour la première :</p>' +
+        '<p class="modal-warn" style="margin-bottom:16px">Optionnel : une deuxième clé, créée avec un <strong>autre compte Google</strong> que ta clé principale. Si ta clé principale atteint sa limite gratuite quotidienne sur tous ses modèles, Bestie Study bascule automatiquement sur celle-ci — un compte Google différent a un quota totalement indépendant. Même méthode que pour la première :</p>' +
         '<p class="modal-warn" style="margin-bottom:16px">⚠️ Utilise une <strong>fenêtre de navigation privée</strong> pour tout ce qui suit, avec <strong>uniquement</strong> le nouveau compte connecté dedans (pas ton compte principal en même temps) — sinon Google mélange les permissions des deux comptes et bloque la création.</p>' +
         '<ol class="apikey-guide-steps">' +
         '<li>En navigation privée, connecté avec le nouveau compte, va sur <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">aistudio.google.com/apikey</a> et clique sur <strong>« Create API key »</strong> (« Créer une clé API »).</li>' +
@@ -409,21 +409,22 @@
         '<div class="theme-row" style="margin-bottom:16px"><span class="theme-label">Mode sombre</span><button class="switch" onclick="App.toggleTheme()" aria-label="Basculer le thème"></button></div>' +
         (function () {
           var swatchHex = { vert: "#4C8C4A", bleu: "#2F7FC1", jaune: "#D9A51B", rose: "#D44C80", violet: "#7A4FC4", rouge: "#D14B35", orange: "#E8862B" };
-          var current = document.documentElement.getAttribute("data-app-color") || "vert";
+          var current = document.documentElement.getAttribute("data-app-color") || "rose";
           return '<div class="field"><label>Couleur du site</label><div class="color-swatches">' +
             APP_COLORS.map(function (c) {
               return '<button type="button" class="color-swatch' + (c === current ? " selected" : "") + '" style="background:' + swatchHex[c] + '" title="' + APP_COLOR_LABELS[c] + '" aria-label="' + APP_COLOR_LABELS[c] + '" onclick="App.setAppColor(\'' + c + '\')"></button>';
             }).join("") + '</div></div>';
         })() +
+        '<div class="field"><label>Ta bestie</label><div class="bestie-set"><img src="' + bestieImg(bestie()) + '" alt=""><span style="flex:1;font-weight:700">' + bestie().name + '</span><button type="button" class="btn btn-sm btn-ghost" style="width:auto" onclick="App.changeBestie()">Modifier ma bestie</button></div></div>' +
         '<div class="field"><label>Ton genre</label><select onchange="App.setUserGender(this.value)">' +
         '<option value="" ' + (getUserGender() === "" ? "selected" : "") + '>Non précisé</option>' +
         '<option value="m" ' + (getUserGender() === "m" ? "selected" : "") + '>Masculin</option>' +
         '<option value="f" ' + (getUserGender() === "f" ? "selected" : "") + '>Féminin</option>' +
         '<option value="autre" ' + (getUserGender() === "autre" ? "selected" : "") + '>Autre</option>' +
         '</select>' +
-        '<p class="modal-warn" style="margin:6px 0 0">Utilisé par le vieux conteur du Podcast pour s\'adresser à toi naturellement ("mon petit"/"ma petite").</p></div>' +
+        '<p class="modal-warn" style="margin:6px 0 0">Utilisé par ta bestie pour s\'adresser à toi naturellement.</p></div>' +
         '<div class="theme-row" style="margin-bottom:6px"><span class="theme-label">Rappel de révision</span><button class="switch ' + (getReminderEnabled() ? "switch-on" : "") + '" onclick="App.toggleReminder()" aria-label="Activer le rappel"></button></div>' +
-        '<p class="modal-warn" style="margin:0 0 16px">Notification du navigateur s\'il te reste une session Mission Contrôle à faire aujourd\'hui — seulement quand Studino est ouvert (pas de vraie notification en arrière-plan sans appli).</p>' +
+        '<p class="modal-warn" style="margin:0 0 16px">Notification du navigateur s\'il te reste une session Mission Contrôle à faire aujourd\'hui — seulement quand Bestie Study est ouvert (pas de vraie notification en arrière-plan sans appli).</p>' +
         '<div class="field"><label>Volume musique — <span id="vol-music-val">' + getVolumeMusic() + '</span>%</label>' +
         '<input type="range" min="0" max="100" value="' + getVolumeMusic() + '" oninput="document.getElementById(\'vol-music-val\').textContent=this.value;App.setVolumeMusic(this.value)"></div>' +
         '<div class="field"><label>Volume effets sonores — <span id="vol-sfx-val">' + getVolumeSfx() + '</span>%</label>' +

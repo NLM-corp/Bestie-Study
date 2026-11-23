@@ -1,5 +1,5 @@
 "use strict";
-// Studino — calendrier, répétition espacée, sauvegarde, Aujourd'hui
+// Bestie Study — calendrier, répétition espacée, sauvegarde, Aujourd'hui
 // Fichier chargé dans l'ordre par index.html : les fichiers partagent les mêmes variables globales.
 
   /* ---------------- Calendrier ----------------
@@ -299,7 +299,7 @@
       '<div class="cal-row"><span>De</span><input type="time" id="cal-st-start" value="' + st.studyStart + '"><span>à</span><input type="time" id="cal-st-end" value="' + st.studyEnd + '"></div>' +
       '<div class="modal-actions"><button type="button" class="btn btn-ghost" onclick="App.closeModal()">Annuler</button><button type="button" class="btn btn-primary" onclick="App.calSaveSettings()">Enregistrer</button></div>';
   }
-  // Notifications des événements (tant que Studino est ouvert) : toast + notification du navigateur.
+  // Notifications des événements (tant que Bestie Study est ouvert) : toast + notification du navigateur.
   var calNotified = {};
   setInterval(function () {
     if (!DB || !DB.currentUser) return;
@@ -318,7 +318,7 @@
       calNotified[key] = true;
       var msg = "🔔 " + o.title + (o.time ? " à " + o.time : "") + (o.location ? " · " + o.location : "");
       toast(msg);
-      try { if (window.Notification && Notification.permission === "granted") new Notification("Studino", { body: msg }); } catch (e) {}
+      try { if (window.Notification && Notification.permission === "granted") new Notification("Bestie Study", { body: msg }); } catch (e) {}
     });
   }, 30000);
 
