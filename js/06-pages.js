@@ -1026,8 +1026,7 @@
     { id: "transcription", label: "Retranscription" },
     { id: "explication", label: "Explication" },
     { id: "videos", label: "Vidéos" },
-    { id: "flashcards", label: "Flashcards" },
-    { id: "quiz", label: "Contrôle" }
+    { id: "flashcards", label: "Flashcards" }
   ];
 
   // Schémas propres à la fiche + schémas découpés dans les cours de la matière (la fiche peut les reprendre).
@@ -1209,7 +1208,7 @@
     } else {
       body += '<div class="rte-display" style="color:var(--text-muted);font-size:13.5px;margin-bottom:6px">Ta réponse :</div>' +
         '<div class="rte-display" style="margin-bottom:14px">' + (s.answerHtml || "<em>(vide)</em>") + '</div>' +
-        '<div style="font-size:13.5px;margin-bottom:14px"><b>Réponse attendue :</b>' + mdToHtml(item.answer || "") + '</div>';
+        '<div style="font-size:13.5px;margin-bottom:14px"><b>Réponse attendue :</b>' + mdToHtml(item.answer || "") + '</div>' + exoSolutionFigureHtml(item);
     }
     if (s.revealed && s.wasCorrect != null) {
       var slvl = s.level || (s.wasCorrect ? "correct" : "wrong");
@@ -1220,7 +1219,7 @@
         (s.aiFeedback ? '<div class="correction-exp">' + mdToHtml(s.aiFeedback) + '</div>' : "") +
         (item.kind === "exercise" ? '' : '<div class="correction-exp">' + mdToHtml(item.explanation || "") + '</div>') +
         '</div>' +
-        (item.kind === "exercise" ? '<div class="dp-exercise-box" style="margin-top:14px"><div class="dp-exercise-label">Solution de référence</div><div class="dp-exercise-text">' + mdToHtml(splitInlineNumberedQuestions(item.solution)) + '</div></div>' : '') +
+        (item.kind === "exercise" ? '<div class="dp-exercise-box" style="margin-top:14px"><div class="dp-exercise-label">Solution de référence</div><div class="dp-exercise-text">' + mdToHtml(splitInlineNumberedQuestions(item.solution)) + '</div>' + exoSolutionFigureHtml(item) + '</div>' : '') +
         '<div class="quiz-nav" style="margin-top:14px"><span></span><button class="btn btn-primary" style="width:auto" onclick="App.examPrepNext()">' + (s.idx === s.pool.length - 1 ? "Terminer" : "Suivante →") + '</button></div>';
     }
     renderShell(["examprep", prep.id], backBtn + head + '<div class="exercise-layout"><div class="quiz-wrap">' + body + '</div>' + dinoCompanionHtml() + '</div>');
@@ -1468,7 +1467,7 @@
     var loc = locateCourse(courseId);
     if (!loc) { navigate("#/"); return; }
     var course = loc.course;
-    tab = tab || "transcription";
+    tab = TABS.some(function (t) { return t.id === tab; }) ? tab : "transcription";
     var head = '<div class="course-head">' +
       (course.images && course.images.length ? (isPdfDataUrl(course.images[0]) ? '<div class="course-thumb file-thumb-pdf">📄<span>PDF</span></div>' : '<img class="course-thumb" src="' + course.images[0] + '">') : '') +
       '<div><h1 class="page-title" style="margin-bottom:6px">' + esc(course.title) + '</h1>' +
@@ -1476,6 +1475,7 @@
       (course.status !== "processing" ? (
         '<div style="display:flex;gap:10px;margin-left:auto">' +
         (course.status === "ready" ? '<button class="btn btn-ghost btn-sm" style="width:auto" onclick="App.openDownloadCourseModal(\'' + course.id + '\')">⬇️ Télécharger en PDF</button>' : "") +
+        exoButtonHtml(course) +
         (course.status === "ready" ? '<button class="btn btn-ghost btn-sm" style="width:auto" onclick="App.retryGeneration(\'' + course.id + '\')">🔄 Régénérer</button>' : "") +
         '<button class="btn btn-ghost btn-sm" style="width:auto" onclick="App.openAddCourseDocsModal(\'' + course.id + '\')">' + icon("camera") + ' Ajouter des documents</button>' +
         '</div>'
@@ -1576,98 +1576,14 @@
      tournés vers la gauche (vers le texte). b = corps, l = ventre, d = ombre, e = œil, w = crème
      (cornes, coquille), o = plaques, s = taches. Chaque dino prend la couleur de son encadré. */
   var FICHE_DINOS = {
-    trex: [
-      "..bbbb........",
-      ".bbbbbb.......",
-      ".bebbbb.......",
-      ".bbbbbbb......",
-      ".....bbb...bb.",
-      "....lbbbbbbbbb",
-      "...dlbbbbbbb.b",
-      "....lbbbbbb...",
-      ".....lbbbb....",
-      ".....dd.bb....",
-      ".....d...b...."
-    ],
-    diplo: [
-      "bbb............",
-      "ebbb...........",
-      "..bb...........",
-      "..bb...........",
-      "..bbbbbbbb.....",
-      "..bbbbbbbbbbb..",
-      "...llllllbbbbbb",
-      "...bb.bb.bb...b",
-      "...dd.dd.dd...."
-    ],
-    tricera: [
-      "......dddd......",
-      ".....dbbbbd.....",
-      "ww..dbbbbbbbbb..",
-      "..wbbbbbbbbbbbb.",
-      ".bebbbbbbbbbbbbb",
-      "wbbbbllllllbbbb.",
-      "...bb.bb..bb.bb.",
-      "...dd.dd..dd.dd."
-    ],
-    stego: [
-      "......o.o.o....",
-      ".....ooooooo...",
-      "....bbbbbbbbb..",
-      ".bbbbbbbbbbbbbo",
-      "bebbbbbbbbbbbb.",
-      ".bbllllllllbb..",
-      "..bb.bb..bb.bb.",
-      "..dd.dd..dd.dd."
-    ],
-    raptor: [
-      "..bbbb.........",
-      ".bbebbb........",
-      "bbbbbb.........",
-      "...bbb.........",
-      "...lbbbbb......",
-      "..dlbbbbbbbbbbb",
-      "...lbbbbb......",
-      "....bb.bb......",
-      "....b...b......",
-      "...dd..dd......"
-    ],
-    ankylo: [
-      "....d.d.d.d.......",
-      "..bbbbbbbbbbb.....",
-      ".bbbbbbbbbbbbbb.dd",
-      "bebbbbbbbbbbbbbbdd",
-      ".bblllllllllbb....",
-      "..bb.bb..bb.bb....",
-      "..dd.dd..dd.dd...."
-    ],
-    ptero: [
-      "........b.....b..",
-      ".......bb....bb..",
-      "......bbb...bbb..",
-      ".....bbbb..bbbb..",
-      "..dd.bbbbbbbbb...",
-      "bbebbbbbllbbb....",
-      "...b..bbbbb......",
-      ".......d..d......"
-    ],
-    bebe: [
-      "......bbbb....",
-      ".....bbbbbb...",
-      "....bbbebbbb..",
-      "..bbbbbbbbbb..",
-      "..dddddbbbbb..",
-      "...lllbbbbb...",
-      ".w..w.bbbbw.w.",
-      ".ww.wwbbbbwww.",
-      "wwwwwlbbbbwwww",
-      "wwswwwlllwwwsw",
-      "wwwwwwwwwwwwww",
-      ".wwswwwwwswww.",
-      ".wwwwwwwwwwww.",
-      "..wwwwwwwwww..",
-      "....wwwwww...."
-    ]
+    trex: ["..bbb...bbb..", ".bwwbb.bbbbb.", "bwwbbbbbbbbbb", "bwbbbbbbbbbbb", "bbbbebbbebbbb", "bbbbebbbebbbb", ".bssbeeebssb.", "..bbbbbbbbb..", "...bbbbbbb...", "....bbbbb....", ".....bbb.....", "......d......"],
+    diplo: ["bbb.......bbb", "bwbbb...bbbbb", "bbbbbbdbbbbbb", "bbebbdddbbebb", "bbsbbdddbbsbb", "bbbbbbdbbbbbb", "bbbbb.d.bbbbb", "bbb..bdb..bbb", "....bb.bb....", "...bb...bb..."],
+    tricera: ["......b......", ".....bbb.....", ".....bwb.....", "bbbbbbbbbbbbb", ".bbbebbbebbb.", "..bbebbbebb..", "..bsbeeebsb..", "..bbbbbbbbb..", ".bbbbb.bbbbb.", ".bbb.....bbb.", "bb.........bb"],
+    stego: ["....bbb....", ".bbbbbbbbb.", "bbbbooobbbb", "bbboeoeobbb", "bbbooooobbb", "bbbboeobbbb", ".bbbbbbbbb.", "....bbb....", ".....d.....", "...ddd.....", ".....d....."],
+    raptor: ["..bbb...bbb..", ".bwwbb.bbbbb.", "bwwbbbbbbbbbb", "bbbeebbbeebbb", "bbbeebbbeebbb", "bbbbbbbbbbbbb", ".bsbbbeebbsb.", "..bbbbeebbb..", "...bbbbbbb...", "....bbbbb....", ".....bbb.....", "......d......"],
+    ankylo: ["b.....b.....b", "bb...bbb...bb", "bbb.bbbbb.bbb", "bbbbbbbbbbbbb", "bwbbebbbebbwb", "bbbsbeeebsbbb", "bbbbbbbbbbbbb", "ddddddddddddd"],
+    ptero: ["bbb.....bbb", "bwbb.d.bbbb", "bbbbbdbbbwb", "bbbebdbebbb", ".bbbbdbbbb.", "..bbbdbbb..", ".bsbbdbbsb.", ".bbb.d.bbb."],
+    bebe: [".......o...", "....b.ooo..", "...bbb.o...", "bbbbbbbbb..", ".bbebebb...", "..bsbsb....", "..bbebb....", ".bbb.bbb...", "bb.....bb.."]
   };
   var FICHE_DINO_FOR = { essentiel: "trex", def: "diplo", formule: "tricera", exemple: "stego", piege: "raptor", methode: "ankylo", retenir: "ptero", astuce: "bebe", quiz: "trex" };
   var FICHE_DINO_COLOR = { essentiel: "#D9A51B", def: "#2F7FC1", formule: "#7A4FC4", exemple: "#4C8C4A", piege: "#D14B35", methode: "#E07B1A", retenir: "#D9A51B", astuce: "#D44C80", quiz: "#5b6472" };
@@ -1686,7 +1602,7 @@
     if (!ficheDinoCache[key]) {
       var w = Math.max.apply(null, rows.map(function (r) { return r.length; }));
       var padded = rows.map(function (r) { return r + new Array(w - r.length + 1).join("."); });
-      ficheDinoCache[key] = { src: drawSprite(padded, { b: color, l: mixHex(color, "#ffffff", 0.45), d: mixHex(color, "#000000", 0.35), e: "#1b1b1b", w: "#E6D3A3", o: "#E8862B", s: "#9AD48F" }, 4), w: w, h: rows.length };
+      ficheDinoCache[key] = { src: drawSprite(padded, { b: color, l: mixHex(color, "#ffffff", 0.45), d: mixHex(color, "#000000", 0.35), e: "#4A1F36", w: "#FFFFFF", o: "#FFD45E", s: "#FFB3D1" }, 4), w: w, h: rows.length };
     }
     var d = ficheDinoCache[key];
     return '<img class="fiche-dino ' + (cls || "") + '" src="' + d.src + '" width="' + d.w * scale + '" height="' + d.h * scale + '" alt="">';
@@ -1704,7 +1620,7 @@
      photos collées comme des polaroïds. Les petits dinos vivent dans la marge (autocollants à chaque partie)
      et ce sont eux qui préviennent des pièges et donnent les astuces, dans une bulle. Le quiz de fin se joue
      « feuille pliée » : les réponses sont cachées (à l'écran on clique, sur papier elles sont à l'envers). */
-  var NB_STICKER_COLORS = ["#4C8C4A", "#2F7FC1", "#D9A51B", "#D14B35", "#7A4FC4", "#E07B1A", "#D44C80"];
+  var NB_STICKER_COLORS = ["#E86FA3", "#B48CE0", "#F2B33D", "#F08A8A", "#9A7CCB", "#F29BC1", "#6DBFA3"];
   var NB_LEAD_EMOJI = new RegExp("^(?:\\s|[" + String.fromCharCode(0x2190) + "-" + String.fromCharCode(0x2BFF) + String.fromCharCode(0xFE0F) + String.fromCharCode(0x200D) + "]|[" + String.fromCharCode(0xD83C) + "-" + String.fromCharCode(0xD83E) + "][" + String.fromCharCode(0xDC00) + "-" + String.fromCharCode(0xDFFF) + "])+");
   var nbRot = 0;
   function nbTilt(max) { nbRot++; var v = Math.sin(nbRot * 12.9898) * 43758.5453; v = v - Math.floor(v); return ((v * 2 - 1) * max).toFixed(2) + "deg"; }
@@ -1733,9 +1649,9 @@
       case "retenir":     // coup de tampon
         return '<div class="nb-retenir"><span class="nb-stamp" style="--tilt:' + nbTilt(4) + '">À retenir</span><div class="nb-retenir-b">' + (t ? '<b>' + t + '</b> ' : "") + body() + '</div></div>';
       case "piege":       // le raptor prévient, dans une bulle
-        return '<div class="nb-talk nb-talk-piege">' + ficheDinoHtml("raptor", "#D14B35", "nb-talk-dino", 4) + '<div class="nb-bubble"><div class="nb-bubble-t">' + (t || "Attention, piège !") + '</div>' + body() + '</div></div>';
+        return '<div class="nb-talk nb-talk-piege">' + ficheDinoHtml("raptor", "#E0507F", "nb-talk-dino", 4) + '<div class="nb-bubble"><div class="nb-bubble-t">' + (t || "Attention, piège !") + '</div>' + body() + '</div></div>';
       case "astuce":      // le bébé dino souffle l'astuce
-        return '<div class="nb-talk nb-talk-astuce">' + ficheDinoHtml("bebe", "#D44C80", "nb-talk-dino", 4) + '<div class="nb-bubble"><div class="nb-bubble-t">' + (t || "Astuce pour retenir") + '</div>' + body() + '</div></div>';
+        return '<div class="nb-talk nb-talk-astuce">' + ficheDinoHtml("bebe", "#F2B33D", "nb-talk-dino", 4) + '<div class="nb-bubble"><div class="nb-bubble-t">' + (t || "Astuce pour retenir") + '</div>' + body() + '</div></div>';
       case "quiz": {      // feuille pliée : questions à gauche, réponses cachées à droite
         var qs = lines.filter(function (l) { return l.trim(); }).map(function (l, k) {
           var qa = l.replace(/^[-*]\s+|^\d+[.)]\s+/, "").split(/\s*=>\s*/);
@@ -1751,7 +1667,7 @@
     nbRot = 0;
     var kind = sheet.scope === "theme" ? "fiche de thème" : sheet.scope === "course" ? "fiche de cours" : "fiche de chapitre";
     return '<div class="nb">' +
-      '<div class="nb-head">' + ficheDinoHtml("trex", "#4C8C4A", "nb-head-dino", 4) +
+      '<div class="nb-head">' + ficheDinoHtml("trex", "#E86FA3", "nb-head-dino", 4) +
       '<div class="nb-head-sub">' + esc(subjectName || "") + (chapterName ? ' · ' + esc(chapterName) : "") + ' — ' + kind + '</div>' +
       '<h1 class="nb-title"><span>' + esc(sheet.title) + '</span></h1>' +
       '<div class="nb-key"><span class="nb-key-t">mon code couleur :</span><span class="fi fi-def">définition</span><span class="fi fi-date">date, chiffre</span><span class="fi fi-ex">exemple</span><span class="fi fi-piege">piège</span><mark class="fi-key">essentiel</mark></div>' +
@@ -1761,7 +1677,7 @@
   }
   // Légende du code couleur, affichée en tête des fiches.
   function ficheLegendHtml() {
-    return '<div class="fiche-legend">' + ficheDinoHtml("trex", "#4C8C4A", "legend-dino") + '<span class="fl-title">Code couleur :</span>' +
+    return '<div class="fiche-legend">' + ficheDinoHtml("trex", "#E86FA3", "legend-dino") + '<span class="fl-title">Code couleur :</span>' +
       '<span class="fi fi-def">Définition</span><span class="fl-chip fl-formule">Formule</span><span class="fi fi-date">Date / chiffre</span>' +
       '<span class="fi fi-ex">Exemple</span><span class="fi fi-piege">Piège</span><mark class="fi-key">À retenir</mark><span class="fl-chip fl-astuce">Astuce</span></div>';
   }

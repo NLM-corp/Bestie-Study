@@ -319,7 +319,8 @@
         '<p class="modal-warn">' + warn + ' <strong>Cette action est définitive.</strong></p>' +
         '<div class="modal-actions"><button type="button" class="btn btn-ghost" onclick="App.closeModal()">Annuler</button><button type="button" class="btn btn-danger" onclick="App.executeDelete()">Supprimer</button></div>';
     } else if (modal.type === "confirmImportBackup") {
-      inner = '<h3>Importer cette sauvegarde ?</h3>' +
+      if (modal.studino) inner = studinoImportHtml();
+      else inner = '<h3>Importer cette sauvegarde ?</h3>' +
         '<p class="modal-warn">Ce fichier contient ' + modal.userCount + ' compte' + (modal.userCount > 1 ? "s" : "") + '.</p>' +
         '<p class="modal-warn"><strong>🔀 Fusionner</strong> (recommandé) : garde tout ce que tu as déjà sur cet appareil et rajoute simplement ce qui n\'existe QUE dans le fichier importé (nouveaux cours, exercices, prépas...) — rien n\'est perdu d\'un côté ni de l\'autre.</p>' +
         '<p class="modal-warn"><strong>♻️ Remplacer</strong> : efface tout ce qui est sur cet appareil et le remplace entièrement par le contenu du fichier — <strong>définitif</strong>, à utiliser seulement si cet appareil ne contient que des tests à jeter.</p>' +
@@ -403,7 +404,7 @@
         '<button type="button" class="btn btn-sm btn-ghost" style="width:auto" onclick="document.getElementById(\'import-backup-input\').click()">⬆️ Importer</button>' +
         '<input type="file" id="import-backup-input" accept="application/json" style="display:none" onchange="App.importBackupFile(event)">' +
         '</div>' +
-        '<p class="modal-warn" style="margin:6px 0 0">Exporte un fichier pour récupérer tes comptes et données sur une autre adresse ou un autre appareil. Importer un fichier remplace toutes les données de ce navigateur.</p>' +
+        '<p class="modal-warn" style="margin:6px 0 0">Exporte un fichier pour récupérer tes comptes et données sur une autre adresse ou un autre appareil. Le fichier de sauvegarde de Studino marche aussi : tous tes cours et tes exercices s\'ajoutent à ton compte.</p>' +
         '</div>' +
         installAppFieldHtml() +
         '<div class="theme-row" style="margin-bottom:16px"><span class="theme-label">Mode sombre</span><button class="switch" onclick="App.toggleTheme()" aria-label="Basculer le thème"></button></div>' +

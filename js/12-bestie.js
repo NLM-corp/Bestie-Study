@@ -191,6 +191,66 @@
       '<div class="msg-form">' + tools + '<div class="msg-row"><button type="button" class="msg-plus" onclick="App.toggleChatTools()" title="Formules, dessin, tableau…" aria-label="Outils">+</button>' + box + '<button type="button" class="msg-send"' + dis + ' onclick="App.sendCourseChat(\'' + id + '\')" title="Envoyer (Ctrl + Entrée)" aria-label="Envoyer">➤</button></div></div></div></div>';
   }
 
+
+  function isStudinoBackup(db, fileName) {
+    if (db.app) return db.app !== "bestie-study";
+    if (/^bestie/i.test(fileName || "")) return false;
+    if (Object.keys(db.data).some(function (u) { return db.data[u] && (db.data[u].bestie || db.data[u].customBesties); })) return false;
+    return true;
+  }
+  function studinoUserToBestie(src) {
+    var d = JSON.parse(JSON.stringify(src || {}));
+    if (d.dinoPark) { d.studinoPoints = d.dinoPark.points || 0; delete d.dinoPark; }
+    (d.subjects || []).forEach(function (s) {
+      (s.themes || [{ chapters: s.chapters }]).forEach(function (t) { (t.chapters || []).forEach(function (c) { (c.courses || []).forEach(function (co) { (co.chat || []).forEach(function (m) { if (!m.bestie) m.bestie = "studino"; }); }); }); });
+    });
+    var seen = {};
+    d.podcasts = (d.podcasts || []).filter(function (p) { return p && !p.pendingReplace; }).sort(function (a, b) { return (a.partIndex || 1) - (b.partIndex || 1); }).filter(function (p) {
+      var g = p.groupId || p.id; if (seen[g]) return false; return seen[g] = true;
+    });
+    d.podcasts.forEach(function (p) {
+      p.title = p.groupName || p.scopeName || p.title;
+      p.script = ""; p.segments = []; p.audioUrl = ""; p.hasAudio = false; p.durationSec = 0; p.partIndex = 1; p.partCount = 1;
+      p.status = "error"; p.errorStatus = null; p.errorDetail = null;
+      p.error = "Ce podcast vient de Studino : clique sur Réessayer et ta bestie te le raconte à sa façon.";
+    });
+    return d;
+  }
+  function studinoToBestie(db) {
+    var out = { users: db.users, data: {}, currentUser: null, mainUser: db.currentUser };
+    Object.keys(db.data).forEach(function (u) { out.data[u] = studinoUserToBestie(db.data[u]); });
+    return out;
+  }
+  function studinoCounts(d) {
+    var n = 0; (d.subjects || []).forEach(function (s) { (s.themes || [{ chapters: s.chapters }]).forEach(function (t) { (t.chapters || []).forEach(function (c) { n += (c.courses || []).length; }); }); });
+    var parts = [[n, "cours"], [(d.importedExercises || []).length, "exercice(s)"], [(d.revisionSheets || []).length, "fiche(s)"], [(d.examPreps || []).length, "prépa(s) contrôle"], [(d.methodologies || []).length, "méthodologie(s)"], [(d.calendarEvents || []).length, "événement(s)"], [(d.podcasts || []).length, "call(s)"]];
+    return parts.filter(function (p) { return p[0]; }).map(function (p) { return p[0] + " " + p[1]; }).join(", ") || "rien";
+  }
+  function studinoImportHtml() {
+    var db = modal.data, users = Object.keys(db.data);
+    var intro = '<h3>📥 Importer depuis Studino</h3>';
+    var rules = '<p class="modal-warn">Rien de ce que tu as déjà sur Bestie Study n\'est effacé. Tes points deviennent des dollars. Les dinos restent sur Studino, et tes podcasts seront à relancer pour que ta bestie te les raconte.</p>';
+    if (!DB.currentUser) {
+      return intro + '<p class="modal-warn">Ton compte Studino sera copié ici. Ensuite, connecte-toi avec le <strong>même nom et le même mot de passe</strong> que sur Studino.</p>' +
+        users.map(function (u) { return '<p class="modal-warn"><strong>' + esc(u) + '</strong> : ' + studinoCounts(db.data[u]) + '</p>'; }).join("") + rules +
+        '<div class="modal-actions"><button type="button" class="btn btn-ghost" onclick="App.closeModal()">Annuler</button><button type="button" class="btn btn-primary" onclick="App.executeMergeBackup()">Importer</button></div>';
+    }
+    var sel = users.indexOf(modal.source) >= 0 ? modal.source : users.indexOf(DB.currentUser) >= 0 ? DB.currentUser : users.indexOf(db.mainUser) >= 0 ? db.mainUser : users[0];
+    modal.source = sel;
+    return intro + (users.length > 1 ? '<div class="field"><label>Quel compte Studino ?</label><select onchange="App.setStudinoSource(this.value)">' + users.map(function (u) { return '<option value="' + esc(u) + '"' + (u === sel ? " selected" : "") + '>' + esc(u) + '</option>'; }).join("") + '</select></div>' : '') +
+      '<p class="modal-warn">On ajoute à ton compte <strong>' + esc(DB.currentUser) + '</strong> : ' + studinoCounts(db.data[sel]) + '.</p>' + rules +
+      '<div class="modal-actions"><button type="button" class="btn btn-ghost" onclick="App.closeModal()">Annuler</button><button type="button" class="btn btn-primary" onclick="App.executeStudinoImport()">Importer</button></div>';
+  }
+  App.setStudinoSource = function (u) { modal.source = u; render(); };
+  App.executeStudinoImport = function () {
+    var src = modal.data.data[modal.source]; if (!src || !DB.currentUser) return;
+    DB.data[DB.currentUser] = mergeUserData(userData(), src);
+    modal = null; saveDB();
+    hydratePodcastAudio().then(hydrateFigureImages).then(function () { render(); });
+    toast("Ton travail Studino est importé !");
+    navigate("#/");
+  };
+
   function bestiePhoneHtml(mode, b) { return '<div class="call-phone"><canvas class="bestie-phone" width="660" height="1320" data-mode="' + mode + '" data-bestie="' + b.id + '" role="img" aria-label="Appel avec ' + b.name + '"></canvas></div>'; }
 
 (function () {
@@ -286,4 +346,14 @@ function buildBase() {
     document.querySelectorAll("canvas.bestie-phone").forEach(function (c) { phDraw(c, now); });
   }
   requestAnimationFrame(phLoop);
+})();
+
+(function () {
+  var host = document.getElementById("bg-decor"); if (!host) return;
+  var kinds = ["trex", "tricera", "diplo", "spark", "ptero", "trex", "spark", "diplo", "stego", "tricera", "trex", "spark", "ankylo", "diplo"], spark = ["...b...", "...b...", "..bbb..", "bbbbbbb", "..bbb..", "...b...", "...b..."];
+  host.innerHTML = kinds.map(function (k, i) {
+    var rows = k === "spark" ? spark : FICHE_DINOS[k], w = Math.max.apply(0, rows.map(function (r) { return r.length; })), d = "";
+    rows.forEach(function (r, y) { for (var x = 0; x < r.length; x++) if (r[x] !== "." && r[x] !== "e") d += "M" + x + " " + y + "h1.02v1.02h-1.02z"; });
+    return '<svg class="bg-pixel bg-pixel-' + (i + 1) + '" viewBox="0 0 ' + w + ' ' + rows.length + '"><path d="' + d + '"/></svg>';
+  }).join("");
 })();

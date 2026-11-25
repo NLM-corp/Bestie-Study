@@ -1148,7 +1148,7 @@
       // contexte différents, même notion) avant de démarrer, pour éviter de retomber mot pour mot sur le
       // même exercice à chaque répétition.
       // (Les exercices, eux, sont remplacés par des exercices inédits : inutile de les reformuler.)
-      var repeats = picked.filter(function (it) { return it.kind === "open" && prep.itemUseCount[it.id]; });
+      var repeats = picked.filter(function (it) { return it.kind === "open" && prep.itemUseCount[it.id] && !it.figureSvg; });
       picked.forEach(function (it) { (it.parts || [it.id]).forEach(function (pid) { prep.itemUseCount[pid] = (prep.itemUseCount[pid] || 0) + 1; }); });
       saveDB();
       if (!repeats.length || !getApiKey()) { finalizeLaunch(picked); return; }
@@ -1211,7 +1211,7 @@
       s.status = "grading";
       render();
       var referenceAnswer = item.kind === "exercise" ? item.solution : item.answer;
-      gradeExerciseAnswer(item.prompt, referenceAnswer, answerText).then(function (result) {
+      gradeExerciseAnswer(item.prompt, referenceAnswer, answerText, item.figureSvg, item.solutionSvg).then(function (result) {
         s.status = "graded";
         s.revealed = true;
         s.aiFeedback = result.feedback || "";
@@ -1343,7 +1343,7 @@
       ex.answerText = answerText;
       ex.answerStatus = "grading";
       saveDB(); render();
-      gradeExerciseAnswer(ex.statement, ex.solution, answerText).then(function (result) {
+      gradeExerciseAnswer(ex.statement, ex.solution, answerText, ex.figureSvg).then(function (result) {
         ex.answerStatus = "graded";
         var level = normalizeGradeLevel(result);
         ex.level = level;
@@ -1523,6 +1523,7 @@
     exportBackup: function () {
       toast("Préparation de la sauvegarde…");
       exportCopyWithFigures(JSON.parse(JSON.stringify(dbWithoutPodcastAudio()))).then(function (copy) {
+      copy.app = "bestie-study";
       var json = JSON.stringify(copy, null, 2);
       var blob = new Blob([json], { type: "application/json" });
       var url = URL.createObjectURL(blob);
@@ -1545,14 +1546,17 @@
       reader.onload = function () {
         var parsed;
         try { parsed = JSON.parse(reader.result); } catch (err) { toast("Fichier invalide — ce n'est pas une sauvegarde Bestie Study."); return; }
-        if (!parsed || typeof parsed !== "object" || typeof parsed.users !== "object" || typeof parsed.data !== "object") {
+        if (!parsed || typeof parsed !== "object" || !parsed.users || !parsed.data || typeof parsed.users !== "object" || typeof parsed.data !== "object") {
           toast("Fichier invalide — ce n'est pas une sauvegarde Bestie Study.");
           return;
         }
         // Remplacer DB tout de suite écraserait les données actuelles sans confirmation si l'import
         // échoue ou si l'élève s'est trompé de fichier : on passe par une confirmation explicite,
         // comme pour toute autre suppression/écrasement dans l'appli.
-        modal = { type: "confirmImportBackup", data: parsed, userCount: Object.keys(parsed.users).length };
+        var fromStudino = isStudinoBackup(parsed, file.name);
+        if (fromStudino) parsed = studinoToBestie(parsed);
+        delete parsed.app;
+        modal = { type: "confirmImportBackup", studino: fromStudino, data: parsed, userCount: Object.keys(parsed.users).length };
         render();
       };
       reader.onerror = function () { toast("Impossible de lire ce fichier."); };
@@ -2018,7 +2022,7 @@
       qz.answer = answerText;
       qz.status = "grading";
       render();
-      gradeExerciseAnswer(q.prompt, q.answer, answerText).then(function (result) {
+      gradeExerciseAnswer(q.prompt, q.answer, answerText, q.figureSvg, q.solutionSvg).then(function (result) {
         qz.status = "graded";
         qz.revealed = true;
         qz.aiFeedback = result.feedback || "";
@@ -2060,7 +2064,7 @@
       qz.answer = answer;
       qz.status = "grading";
       render();
-      gradeExerciseAnswer(qz.exercise.prompt, qz.exercise.solution, qz.answer).then(function (result) {
+      gradeExerciseAnswer(qz.exercise.prompt, qz.exercise.solution, qz.answer, qz.exercise.figureSvg, qz.exercise.solutionSvg).then(function (result) {
         qz.status = "graded";
         var level = normalizeGradeLevel(result);
         qz.level = level;
